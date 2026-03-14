@@ -102,3 +102,15 @@ You can override the SDK dependencies to test against custom branches or forks. 
   --msdk-ios-branch my-feature \
   --template iOSNativeSwiftTemplate
 ```
+
+## GitHub Actions Workflows
+
+### PR Workflow
+- Automatically detects changed templates and tests only those
+- Tests ALL templates if `test_template.sh` or `templates.json` changes
+- Runs on macOS-15 (iOS) and Ubuntu (Android)
+
+### Nightly Workflow
+- Automatically discovers and tests ALL templates for each platform from `templates.json`
+- No hardcoded template lists to maintain
+- Runs daily at 2 AM PST (10 AM UTC)
