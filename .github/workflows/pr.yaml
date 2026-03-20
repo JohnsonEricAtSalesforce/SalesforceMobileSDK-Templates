@@ -91,11 +91,13 @@ jobs:
       - name: Determine changed templates
         id: set-templates
         run: |
-          echo "Changed files: ${{ steps.changed-files.outputs.all_changed_files }}"
+          # Store the JSON output in a variable
+          CHANGED_FILES='${{ steps.changed-files.outputs.all_changed_files }}'
+          echo "Changed files: $CHANGED_FILES"
 
           # Check if test script or templates.json changed (test all templates)
           TEST_ALL=false
-          for file in $(echo '${{ steps.changed-files.outputs.all_changed_files }}' | jq -r '.[]'); do
+          for file in $(jq -r '.[]' <<< "$CHANGED_FILES"); do
             if [[ "$file" == "test_template.sh" ]] || [[ "$file" == "templates.json" ]]; then
               TEST_ALL=true
               echo "Core test file changed: $file"
@@ -116,7 +118,7 @@ jobs:
           else
             # Extract template directories from changed files
             CHANGED_TEMPLATES=()
-            for file in $(echo '${{ steps.changed-files.outputs.all_changed_files }}' | jq -r '.[]'); do
+            for file in $(jq -r '.[]' <<< "$CHANGED_FILES"); do
               # Get the first directory component
               TEMPLATE_DIR=$(echo "$file" | cut -d'/' -f1)
 
