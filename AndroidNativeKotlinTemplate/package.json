@@ -2,7 +2,6 @@
   "name": "AndroidNativeKotlinTemplate",
   "version": "0.0.1",
   "private": true,
-  "DO_NOT_COMMIT": "This is a test change to trigger GitHub actions",
   "sdkDependencies": {
     "SalesforceMobileSDK-Android": "https://github.com/forcedotcom/SalesforceMobileSDK-Android.git#dev"
   }
