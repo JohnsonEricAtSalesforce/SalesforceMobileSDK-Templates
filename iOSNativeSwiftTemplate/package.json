@@ -2,6 +2,7 @@
     "name": "iOSNativeSwiftTemplate",
     "version": "0.0.1",
     "private": true,
+    "DO_NOT_COMMIT": "This is a test change to trigger GitHub actions",
     "sdkDependencies": {
         "SalesforceMobileSDK-iOS": "https://github.com/forcedotcom/SalesforceMobileSDK-iOS.git#dev"
     }

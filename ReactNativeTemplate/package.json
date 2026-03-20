@@ -2,6 +2,7 @@
   "name": "ReactNativeTemplate",
   "version": "0.0.1",
   "private": true,
+  "DO_NOT_COMMIT": "This is a test change to trigger GitHub actions",
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
