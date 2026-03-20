@@ -24,6 +24,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+// Test comment for GitHub action
+
 import React from 'react';
 import {
     StyleSheet,

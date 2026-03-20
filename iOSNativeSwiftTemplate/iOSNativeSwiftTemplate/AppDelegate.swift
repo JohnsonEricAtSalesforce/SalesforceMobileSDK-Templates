@@ -27,6 +27,8 @@ import UIKit
 import MobileSync
 import SwiftUI
 
+// Test comment for GitHub action
+
 @UIApplicationMain
 class AppDelegate : UIResponder, UIApplicationDelegate {
     var window: UIWindow?
