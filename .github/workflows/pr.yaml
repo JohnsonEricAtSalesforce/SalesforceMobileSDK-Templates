@@ -91,8 +91,8 @@ jobs:
       - name: Determine changed templates
         id: set-templates
         run: |
-          # Store the JSON output in a variable
-          CHANGED_FILES='${{ steps.changed-files.outputs.all_changed_files }}'
+          # Store the JSON output and remove escaped quotes
+          CHANGED_FILES=$(echo '${{ steps.changed-files.outputs.all_changed_files }}' | sed 's/\\//g')
           echo "Changed files: $CHANGED_FILES"
 
           # Check if test script or templates.json changed (test all templates)
