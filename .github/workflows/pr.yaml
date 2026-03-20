@@ -74,6 +74,15 @@ jobs:
             **/build.gradle.kts
             **/settings.gradle
             **/package.json
+            **/*.swift
+            **/*.kt
+            **/*.java
+            **/*.m
+            **/*.h
+            **/*.js
+            **/*.jsx
+            **/*.ts
+            **/*.tsx
             test_template.sh
             templates.json
           dir_names: true
