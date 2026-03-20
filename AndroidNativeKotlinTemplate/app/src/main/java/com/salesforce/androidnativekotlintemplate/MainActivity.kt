@@ -26,8 +26,6 @@
  */
 package com.salesforce.androidnativekotlintemplate
 
-// Test comment for GitHub action
-
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP
 import android.net.Uri
