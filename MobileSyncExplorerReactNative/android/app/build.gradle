@@ -110,3 +110,8 @@ dependencies {
 }
 
 apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
+
+afterEvaluate {
+    tasks.findByName("generateReleaseLintVitalReportModel")
+        ?.mustRunAfter("copyReactNativeVectorIconFonts")
+}

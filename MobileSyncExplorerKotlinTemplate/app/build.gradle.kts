@@ -15,7 +15,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.9.1")
     implementation("androidx.window:window:1.4.0")
 
-    implementation("com.salesforce.mobilesdk:MobileSync:13.1.1")
+    implementation("com.salesforce.mobilesdk:MobileSync:13.2.0")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
@@ -69,7 +69,7 @@ android {
 
     @Suppress("UnstableApiUsage")
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.5"
+        kotlinCompilerExtensionVersion = "1.5.14"
     }
 
     packaging {
