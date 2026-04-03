@@ -43,11 +43,6 @@ function prepare(config, replaceInFiles, moveFile, removeFile) {
     //
     require('./install');
 
-    //
-    // Picking theme: if you are generating for ios and android, you end up with the ios look
-    //
-    var theme = (config.platform.indexOf('ios') >= 0 ? 'ios' : 'android');
-
     // Key files
     var templateBootconfigFile = path.join('bootconfig.json');
     var templateServersFile = path.join('servers.xml'); // android only
@@ -102,8 +97,6 @@ function prepare(config, replaceInFiles, moveFile, removeFile) {
         }
         moveFile('servers.xml', serversNewPath);
     }
-    moveFile(path.join('node_modules', 'ratchet-npm', 'dist', 'css', 'ratchet.min.css'), 'ratchet.css');
-    moveFile(path.join('node_modules', 'ratchet-npm', 'dist', 'css', 'ratchet-theme-' + theme + '.min.css'), 'ratchet-theme.css');
     removeFile('node_modules');
     removeFile('mobile_sdk');
     removeFile('package.json');
