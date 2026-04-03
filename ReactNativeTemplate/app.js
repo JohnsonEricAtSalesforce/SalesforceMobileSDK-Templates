@@ -24,77 +24,388 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * Salesforce Mobile SDK React Native Template
+ *
+ * This template demonstrates:
+ * 1. Authenticating with Salesforce using the Mobile SDK
+ * 2. Querying data from Salesforce using SOQL
+ * 3. Displaying results in a mobile-friendly interface
+ *
+ * Customize by modifying the SOQL query and display logic below.
+ */
+
 import React from 'react';
 import {
     StyleSheet,
     Text,
     View,
     FlatList,
+    ActivityIndicator,
+    TouchableOpacity,
 } from 'react-native';
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import {oauth, net} from 'react-native-force';
 
+// ===========================
+// Design Tokens
+// ===========================
+// Centralized color and spacing values for consistent design
+const colors = {
+    sfBlue: '#0176d3',
+    background: '#f3f3f3',
+    surface: '#ffffff',
+    textPrimary: '#181818',
+    textSecondary: '#706e6b',
+    border: '#dddbda',
+    error: '#c23934',
+};
+
+// ===========================
+// Contact List Screen Component
+// ===========================
+/**
+ * Main screen component that displays a list of Salesforce contacts.
+ * Handles authentication, data fetching, and UI rendering.
+ */
 class ContactListScreen extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {data: []};
+        // Initialize component state
+        this.state = {
+            data: [],          // Array of contact records
+            loading: true,     // Loading state indicator
+            error: null,       // Error message if any
+        };
     }
 
+    // ===========================
+    // Authentication
+    // ===========================
+    /**
+     * Authenticate with Salesforce when the component mounts.
+     * The Mobile SDK handles the OAuth flow automatically.
+     */
     componentDidMount() {
-        var that = this;
+        console.log('Component mounted - checking authentication');
         oauth.getAuthCredentials(
-            () => that.fetchData(), // already logged in
+            () => this.fetchData(),  // Already logged in - fetch data immediately
             () => {
+                // Not logged in - trigger OAuth authentication flow
+                console.log('Not authenticated - starting OAuth flow');
                 oauth.authenticate(
-                    () => that.fetchData(),
-                    (error) => console.log('Failed to authenticate:' + error)
+                    () => this.fetchData(),
+                    (error) => {
+                        console.error('Authentication failed:', error);
+                        this.setState({
+                            loading: false,
+                            error: 'Unable to authenticate with Salesforce'
+                        });
+                    }
                 );
-            });
+            }
+        );
     }
 
+    // ===========================
+    // Data Fetching
+    // ===========================
+    /**
+     * Fetches contact records from Salesforce using a SOQL query.
+     *
+     * To customize:
+     * - Change fields: Modify the SELECT clause
+     * - Query different objects: Change 'Contact' to another SObject
+     * - Add filters: Add a WHERE clause
+     * - Change limit: Modify the LIMIT value
+     */
     fetchData() {
-        var that = this;
-        net.query('SELECT Id, Name FROM Contact LIMIT 100',
-                  (response) => that.setState({data: response.records})
-                 );
+        console.log('Fetching contacts from Salesforce...');
+        this.setState({ loading: true, error: null });
+
+        // SOQL Query - customize this for your needs
+        const soql = 'SELECT Id, Name FROM Contact ORDER BY Name LIMIT 100';
+
+        net.query(
+            soql,
+            (response) => {
+                // Query succeeded
+                console.log('Query succeeded. Retrieved', response.totalSize, 'contacts');
+                this.setState({
+                    data: response.records || [],
+                    loading: false,
+                });
+            },
+            (error) => {
+                // Query failed
+                console.error('Query failed:', error);
+                this.setState({
+                    loading: false,
+                    error: 'Failed to fetch contacts: ' + JSON.stringify(error),
+                });
+            }
+        );
     }
 
+    // ===========================
+    // Render Functions
+    // ===========================
+
+    /**
+     * Renders a single contact item with avatar and details.
+     *
+     * @param {Object} item - Contact record from Salesforce
+     * @returns {JSX.Element} Contact list item component
+     */
+    renderContactItem = ({item}) => {
+        const name = item.Name || 'Unknown';
+        const initial = name.charAt(0).toUpperCase();
+
+        return (
+            <TouchableOpacity
+                style={styles.contactItem}
+                activeOpacity={0.7}
+                onPress={() => console.log('Contact selected:', item.Id)}
+            >
+                {/* Contact Avatar - Circle with initial */}
+                <View style={styles.contactAvatar}>
+                    <Text style={styles.contactInitial}>{initial}</Text>
+                </View>
+
+                {/* Contact Details - Name and ID */}
+                <View style={styles.contactDetails}>
+                    <Text style={styles.contactName} numberOfLines={1}>
+                        {name}
+                    </Text>
+                    <Text style={styles.contactId} numberOfLines={1}>
+                        {item.Id}
+                    </Text>
+                </View>
+
+                {/* Chevron indicator */}
+                <Text style={styles.contactChevron}>›</Text>
+            </TouchableOpacity>
+        );
+    };
+
+    /**
+     * Renders the loading state with spinner.
+     *
+     * @returns {JSX.Element} Loading indicator component
+     */
+    renderLoading() {
+        return (
+            <View style={styles.centerContent}>
+                <ActivityIndicator size="large" color={colors.sfBlue} />
+                <Text style={styles.loadingText}>Loading contacts...</Text>
+            </View>
+        );
+    }
+
+    /**
+     * Renders error message.
+     *
+     * @returns {JSX.Element} Error message component
+     */
+    renderError() {
+        return (
+            <View style={styles.centerContent}>
+                <Text style={styles.errorText}>{this.state.error}</Text>
+            </View>
+        );
+    }
+
+    /**
+     * Renders empty state when no contacts are found.
+     *
+     * @returns {JSX.Element} Empty state component
+     */
+    renderEmpty() {
+        return (
+            <View style={styles.centerContent}>
+                <Text style={styles.emptyText}>No contacts found</Text>
+            </View>
+        );
+    }
+
+    /**
+     * Main render method - determines which view to show based on state.
+     *
+     * @returns {JSX.Element} The component tree to render
+     */
     render() {
+        const {data, loading, error} = this.state;
+
+        // Show loading spinner while fetching data
+        if (loading) {
+            return this.renderLoading();
+        }
+
+        // Show error message if query failed
+        if (error) {
+            return this.renderError();
+        }
+
+        // Show empty state if no contacts found
+        if (!data || data.length === 0) {
+            return this.renderEmpty();
+        }
+
+        // Show contact list
         return (
             <View style={styles.container}>
-              <FlatList
-                data={this.state.data}
-                renderItem={({item}) => <Text style={styles.item}>{item.Name}</Text>}
-                keyExtractor={(item, index) => 'key_' + index}
-              />
+                <FlatList
+                    data={data}
+                    renderItem={this.renderContactItem}
+                    keyExtractor={(item, index) => item.Id || 'key_' + index}
+                    contentContainerStyle={styles.listContent}
+                />
             </View>
         );
     }
 }
 
+// ===========================
+// Styles - Modern, clean design
+// ===========================
 const styles = StyleSheet.create({
+    // Container for the entire screen
     container: {
         flex: 1,
-        paddingTop: 22,
-        backgroundColor: 'white',
+        backgroundColor: colors.background,
     },
-    item: {
-        padding: 10,
-        fontSize: 18,
-        height: 44,
-    }
+
+    // Content padding for the list
+    listContent: {
+        padding: 16,
+    },
+
+    // Individual contact item card
+    contactItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: colors.surface,
+        borderRadius: 8,
+        padding: 12,
+        marginBottom: 12,
+        borderWidth: 1,
+        borderColor: colors.border,
+        // Shadow for iOS
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        // Shadow for Android
+        elevation: 2,
+    },
+
+    // Circular avatar with gradient background
+    contactAvatar: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        backgroundColor: colors.sfBlue,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 12,
+    },
+
+    // Initial letter in avatar
+    contactInitial: {
+        color: colors.surface,
+        fontSize: 20,
+        fontWeight: '600',
+    },
+
+    // Container for contact name and ID
+    contactDetails: {
+        flex: 1,
+        marginRight: 8,
+    },
+
+    // Contact name text
+    contactName: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: colors.textPrimary,
+        marginBottom: 4,
+    },
+
+    // Contact ID text (monospace)
+    contactId: {
+        fontSize: 12,
+        color: colors.textSecondary,
+        fontFamily: 'Courier',
+    },
+
+    // Chevron indicator
+    contactChevron: {
+        fontSize: 24,
+        color: colors.textSecondary,
+    },
+
+    // Centered content (loading, error, empty states)
+    centerContent: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 40,
+        backgroundColor: colors.background,
+    },
+
+    // Loading text below spinner
+    loadingText: {
+        marginTop: 16,
+        fontSize: 16,
+        color: colors.textSecondary,
+    },
+
+    // Error message text
+    errorText: {
+        fontSize: 16,
+        color: colors.error,
+        textAlign: 'center',
+    },
+
+    // Empty state text
+    emptyText: {
+        fontSize: 16,
+        color: colors.textSecondary,
+    },
 });
 
+// ===========================
+// Navigation Setup
+// ===========================
 const Stack = createStackNavigator();
 
+/**
+ * App root component with navigation container.
+ * Configures the navigation stack with Salesforce blue header.
+ *
+ * @returns {JSX.Element} Navigation container with app screens
+ */
 export const App = function() {
     return (
         <NavigationContainer>
-          <Stack.Navigator>
-            <Stack.Screen name="Mobile SDK Sample App" component={ContactListScreen} />
-          </Stack.Navigator>
+            <Stack.Navigator
+                screenOptions={{
+                    headerStyle: {
+                        backgroundColor: colors.sfBlue,
+                    },
+                    headerTintColor: colors.surface,
+                    headerTitleStyle: {
+                        fontWeight: '600',
+                    },
+                }}
+            >
+                <Stack.Screen
+                    name="Contacts"
+                    component={ContactListScreen}
+                />
+            </Stack.Navigator>
         </NavigationContainer>
     );
 }
