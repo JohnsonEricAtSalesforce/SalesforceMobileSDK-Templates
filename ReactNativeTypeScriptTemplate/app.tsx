@@ -84,9 +84,11 @@ interface ContactRecord {
 }
 
 /**
- * Component props (empty for this component)
+ * Component props (navigation is provided by React Navigation)
  */
-interface ContactListProps {}
+interface ContactListProps {
+    navigation?: any;  // Navigation prop from Stack.Navigator
+}
 
 /**
  * Component state structure
@@ -119,28 +121,87 @@ class ContactListScreen extends React.Component<ContactListProps, ContactListSta
     // Authentication
     // ===========================
     /**
-     * Authenticate with Salesforce when the component mounts.
-     * The Mobile SDK handles the OAuth flow automatically.
+     * Check authentication status when the component mounts.
+     *
+     * NOTE: This template uses automatic authentication (shouldAuthenticate() returns true).
+     * The Mobile SDK handles the OAuth flow automatically on app startup. We simply check
+     * if authentication has completed, and if so, fetch data.
+     *
+     * If not authenticated yet, we wait for automatic authentication to complete.
+     * The app will be restarted after OAuth, and componentDidMount will run again.
      */
     componentDidMount() {
         console.log('Component mounted - checking authentication');
+        this.updateLogoutButton();
         oauth.getAuthCredentials(
             () => this.fetchData(),  // Already logged in - fetch data immediately
             () => {
-                // Not logged in - trigger OAuth authentication flow
-                console.log('Not authenticated - starting OAuth flow');
+                // Not authenticated yet - automatic authentication is in progress
+                // Just wait for it to complete (app will restart after OAuth)
+                console.log('Waiting for automatic authentication to complete...');
+            }
+        );
+    }
+
+    /**
+     * Called after component updates.
+     * Updates the Logout button in the header.
+     */
+    componentDidUpdate() {
+        this.updateLogoutButton();
+    }
+
+    // ===========================
+    // Navigation Header Management
+    // ===========================
+
+    /**
+     * Updates the navigation header with Logout button.
+     * Button appears when contacts are loaded (user is authenticated).
+     */
+    updateLogoutButton() {
+        const {data, loading} = this.state;
+        this.props.navigation?.setOptions({
+            headerRight: () => (!loading && data && data.length > 0)
+                ? (
+                    <TouchableOpacity
+                        style={styles.headerButton}
+                        onPress={() => this.onLogout()}
+                        activeOpacity={0.7}
+                    >
+                        <Text style={styles.headerButtonText}>Logout</Text>
+                    </TouchableOpacity>
+                )
+                : null
+        });
+    }
+
+    // ===========================
+    // Authentication Methods
+    // ===========================
+
+    /**
+     * Logs out the user and clears contact data.
+     * User will be prompted to log in again on next app launch.
+     */
+    onLogout() {
+        console.log('onLogout called');
+        oauth.logout(() => {
+            console.log('logout completed');
+            this.setState({data: [], loading: true}, () => {
+                // After logout, restart the authentication flow
                 oauth.authenticate(
                     () => this.fetchData(),
                     (error: any) => {
-                        console.error('Authentication failed:', error);
+                        console.error('Re-authentication failed:', error);
                         this.setState({
                             loading: false,
-                            error: 'Unable to authenticate with Salesforce'
+                            error: 'Unable to re-authenticate with Salesforce'
                         });
                     }
                 );
-            }
-        );
+            });
+        });
     }
 
     // ===========================
@@ -407,6 +468,24 @@ const styles = StyleSheet.create({
     emptyText: {
         fontSize: 16,
         color: colors.textSecondary,
+    },
+
+    // Header button (Logout in navigation bar)
+    headerButton: {
+        marginRight: 16,
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        borderRadius: 6,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.4)',
+    },
+
+    // Header button text
+    headerButtonText: {
+        color: colors.surface,
+        fontSize: 14,
+        fontWeight: '600',
     },
 });
 

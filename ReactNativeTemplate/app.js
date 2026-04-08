@@ -90,6 +90,7 @@ class ContactListScreen extends React.Component {
      */
     componentDidMount() {
         console.log('Component mounted - checking authentication');
+        this.updateLogoutButton();
         oauth.getAuthCredentials(
             () => this.fetchData(),  // Already logged in - fetch data immediately
             () => {
@@ -107,6 +108,67 @@ class ContactListScreen extends React.Component {
                 );
             }
         );
+    }
+
+    /**
+     * Called after component updates.
+     * Updates the Logout button in the header.
+     */
+    componentDidUpdate() {
+        this.updateLogoutButton();
+    }
+
+    // ===========================
+    // Navigation Header Management
+    // ===========================
+
+    /**
+     * Updates the navigation header with Logout button.
+     * Button appears when contacts are loaded (user is authenticated).
+     */
+    updateLogoutButton() {
+        const {data, loading} = this.state;
+        this.props.navigation.setOptions({
+            headerRight: () => (!loading && data && data.length > 0)
+                ? (
+                    <TouchableOpacity
+                        style={styles.headerButton}
+                        onPress={() => this.onLogout()}
+                        activeOpacity={0.7}
+                    >
+                        <Text style={styles.headerButtonText}>Logout</Text>
+                    </TouchableOpacity>
+                )
+                : null
+        });
+    }
+
+    // ===========================
+    // Authentication Methods
+    // ===========================
+
+    /**
+     * Logs out the user and clears contact data.
+     * User will be prompted to log in again on next app launch.
+     */
+    onLogout() {
+        console.log('onLogout called');
+        oauth.logout(() => {
+            console.log('logout completed');
+            this.setState({data: [], loading: true}, () => {
+                // After logout, restart the authentication flow
+                oauth.authenticate(
+                    () => this.fetchData(),
+                    (error) => {
+                        console.error('Re-authentication failed:', error);
+                        this.setState({
+                            loading: false,
+                            error: 'Unable to re-authenticate with Salesforce'
+                        });
+                    }
+                );
+            });
+        });
     }
 
     // ===========================
@@ -373,6 +435,24 @@ const styles = StyleSheet.create({
     emptyText: {
         fontSize: 16,
         color: colors.textSecondary,
+    },
+
+    // Header button (Logout in navigation bar)
+    headerButton: {
+        marginRight: 16,
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        borderRadius: 6,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.4)',
+    },
+
+    // Header button text
+    headerButtonText: {
+        color: colors.surface,
+        fontSize: 14,
+        fontWeight: '600',
     },
 });
 
