@@ -109,6 +109,7 @@ interface ContactListState {
 class ContactListScreen extends React.Component<ContactListProps, ContactListState> {
     constructor(props: ContactListProps) {
         super(props);
+        console.log('Component constructor called');
         // Initialize component state
         this.state = {
             data: [],          // Array of contact records
@@ -121,59 +122,66 @@ class ContactListScreen extends React.Component<ContactListProps, ContactListSta
     // Authentication
     // ===========================
     /**
-     * Check authentication status when the component mounts.
+     * Fetch data when the component mounts.
      *
      * NOTE: This template uses automatic authentication (shouldAuthenticate() returns true).
-     * The Mobile SDK handles the OAuth flow automatically on app startup. We simply check
-     * if authentication has completed, and if so, fetch data.
-     *
-     * If not authenticated yet, we wait for automatic authentication to complete.
-     * The app will be restarted after OAuth, and componentDidMount will run again.
+     * The Mobile SDK handles the OAuth flow automatically before the React Native app loads.
+     * However, we need to wait for the activity to be available before making API calls.
      */
     componentDidMount() {
-        console.log('Component mounted - checking authentication');
-        this.updateLogoutButton();
-        oauth.getAuthCredentials(
-            () => this.fetchData(),  // Already logged in - fetch data immediately
-            () => {
-                // Not authenticated yet - automatic authentication is in progress
-                // Just wait for it to complete (app will restart after OAuth)
-                console.log('Waiting for automatic authentication to complete...');
-            }
-        );
-    }
+        console.log('Component mounted - setting up UI');
 
-    /**
-     * Called after component updates.
-     * Updates the Logout button in the header.
-     */
-    componentDidUpdate() {
-        this.updateLogoutButton();
-    }
-
-    // ===========================
-    // Navigation Header Management
-    // ===========================
-
-    /**
-     * Updates the navigation header with Logout button.
-     * Button appears when contacts are loaded (user is authenticated).
-     */
-    updateLogoutButton() {
-        const {data, loading} = this.state;
+        // Set up logout button in navigation header
         this.props.navigation?.setOptions({
-            headerRight: () => (!loading && data && data.length > 0)
-                ? (
-                    <TouchableOpacity
-                        style={styles.headerButton}
-                        onPress={() => this.onLogout()}
-                        activeOpacity={0.7}
-                    >
-                        <Text style={styles.headerButtonText}>Logout</Text>
-                    </TouchableOpacity>
-                )
-                : null
+            headerRight: () => (
+                <TouchableOpacity
+                    style={styles.headerButton}
+                    onPress={() => this.onLogout()}
+                    activeOpacity={0.7}
+                >
+                    <Text style={styles.headerButtonText}>Logout</Text>
+                </TouchableOpacity>
+            )
         });
+
+        // Wait for activity to be ready by checking credentials
+        // This ensures the React Native bridge has the activity available before we make API calls
+        console.log('Waiting for activity to be ready...');
+        this.waitForActivityAndFetchData();
+    }
+
+    /**
+     * Waits for the activity to be available, then checks authentication and fetches data.
+     * The activity may not be immediately available when the component mounts,
+     * so we wait 1 second before attempting authentication.
+     */
+    waitForActivityAndFetchData() {
+        setTimeout(() => {
+            oauth.getAuthCredentials(
+                (credentials: any) => {
+                    // Already logged in - fetch data immediately
+                    console.log('Already authenticated - fetching data');
+                    this.fetchData();
+                },
+                (error: any) => {
+                    // Not logged in - trigger OAuth flow
+                    console.log('Not authenticated - starting OAuth flow');
+                    oauth.authenticate(
+                        () => {
+                            console.log('OAuth completed - fetching data');
+                            this.fetchData();
+                        },
+                        (authError: any) => {
+                            console.error('Authentication failed:', authError);
+                            this.setState({
+                                loading: false,
+                                error: 'Authentication failed: ' + authError
+                            });
+                        }
+                    );
+                }
+            );
+        }, 1000);
     }
 
     // ===========================
@@ -185,9 +193,9 @@ class ContactListScreen extends React.Component<ContactListProps, ContactListSta
      * User will be prompted to log in again on next app launch.
      */
     onLogout() {
-        console.log('onLogout called');
+        console.log('Logout initiated');
         oauth.logout(() => {
-            console.log('logout completed');
+            console.log('Logout completed - restarting authentication');
             this.setState({data: [], loading: true}, () => {
                 // After logout, restart the authentication flow
                 oauth.authenticate(
@@ -217,7 +225,7 @@ class ContactListScreen extends React.Component<ContactListProps, ContactListSta
      * - Change limit: Modify the LIMIT value
      */
     fetchData() {
-        console.log('Fetching contacts from Salesforce...');
+        console.log('Fetching contacts from Salesforce');
         this.setState({ loading: true, error: null });
 
         // SOQL Query - customize this for your needs
@@ -227,7 +235,7 @@ class ContactListScreen extends React.Component<ContactListProps, ContactListSta
             soql,
             (response: QueryResponse) => {
                 // Query succeeded
-                console.log('Query succeeded. Retrieved', response.totalSize, 'contacts');
+                console.log('Query succeeded - retrieved', response.totalSize, 'contacts');
                 this.setState({
                     data: response.records || [],
                     loading: false,
