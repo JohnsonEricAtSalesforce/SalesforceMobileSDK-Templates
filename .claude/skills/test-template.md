@@ -142,7 +142,7 @@ When coordinating template changes with SDK changes:
 
 ```bash
 # Test each iOS template manually
-for template in iOSNativeSwiftTemplate iOSNativeTemplate iOSIDPTemplate; do
+for template in iOSNativeSwiftTemplate iOSNativeSwiftPackageManagerTemplate iOSIDPTemplate; do
   ./test_template.sh \
     --msdk-ios-branch my-feature \
     --template $template --platform ios
@@ -182,7 +182,7 @@ This skill is used by:
 ```bash
 cd SalesforceMobileSDK-Templates
 
-# After removing iOSNativeTemplate, test remaining iOS templates
+# After removing a template, test remaining iOS templates
 ./test_template.sh --template iOSNativeSwiftTemplate --platform ios
 ./test_template.sh --template iOSIDPTemplate --platform ios
 ./test_template.sh --template iOSNativeLoginTemplate --platform ios

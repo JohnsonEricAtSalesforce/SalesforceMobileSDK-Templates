@@ -33,7 +33,6 @@ SalesforceMobileSDK-Templates/
 │   ├── Podfile                            # CocoaPods dependencies
 │   └── <template-files>                   # Xcode project and source code
 │
-├── iOSNativeTemplate/                     # Objective-C iOS template
 ├── iOSNativeSwiftPackageManagerTemplate/  # Swift with SPM
 ├── iOSNativeSwiftEncryptedNotificationTemplate/  # Swift with notifications
 ├── iOSNativeLoginTemplate/                # Swift native login example
@@ -46,7 +45,6 @@ SalesforceMobileSDK-Templates/
 │   ├── template.js                        # Customizes template for user
 │   └── <template-files>                   # Gradle project and source code
 │
-├── AndroidNativeTemplate/                 # Java Android template
 ├── AndroidNativeLoginTemplate/            # Kotlin native login example
 ├── AndroidIDPTemplate/                    # Kotlin Identity Provider
 ├── MobileSyncExplorerKotlinTemplate/      # Kotlin MobileSync sample app
@@ -433,7 +431,6 @@ See `.github/workflows/` and `TESTING.md` for details.
 | Template | Description | Key Features |
 |----------|-------------|--------------|
 | **iOSNativeSwiftTemplate** | Basic Swift template (most common) | MobileSync, SwiftUI, Combine |
-| **iOSNativeTemplate** | Basic Objective-C template | Legacy, classic UIKit |
 | **iOSNativeSwiftPackageManagerTemplate** | Swift with SPM | Uses Swift Package Manager instead of CocoaPods |
 | **iOSNativeSwiftEncryptedNotificationTemplate** | Swift with notifications | Notification service extension |
 | **iOSNativeLoginTemplate** | Native login UI example | SwiftUI native login screen |
@@ -445,7 +442,6 @@ See `.github/workflows/` and `TESTING.md` for details.
 | Template | Description | Key Features |
 |----------|-------------|--------------|
 | **AndroidNativeKotlinTemplate** | Basic Kotlin template (most common) | Modern Kotlin, Jetpack Compose |
-| **AndroidNativeTemplate** | Basic Java template | Legacy, classic XML layouts |
 | **AndroidNativeLoginTemplate** | Native login UI example | Jetpack Compose native login screen |
 | **AndroidIDPTemplate** | Identity Provider sample | OAuth IDP implementation |
 | **MobileSyncExplorerKotlinTemplate** | Full MobileSync sample | Complete CRUD, sync, conflict resolution |
