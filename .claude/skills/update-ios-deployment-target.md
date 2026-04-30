@@ -1,3 +1,10 @@
+---
+name: update-ios-deployment-target
+description: Update the minimum iOS deployment target across all iOS and React Native templates
+metadata:
+  internal: true
+---
+
 # Update iOS Minimum Deployment Target
 
 This skill updates the minimum iOS deployment target across all Salesforce Mobile SDK Templates that support iOS.
