@@ -16,7 +16,7 @@ This skill adds the Salesforce SmartStore encrypted local database to an existin
 
 ## Prerequisites
 
-The app must already have the Mobile SDK wired up. **Check `AppDelegate.swift` for `SalesforceManager.initializeSDK()` (or `SmartStoreSDKManager` / `MobileSyncSDKManager`).** If not present, run the `add-mobile-sdk-ios` skill first, then return here.
+The app must already have the Mobile SDK wired up. **Check `AppDelegate.swift` for `SalesforceManager.initializeSDK()` (or `SmartStoreSDKManager` / `MobileSyncSDKManager`) and that `bootconfig.plist` exists in the app target.** If not, run the `add-mobile-sdk-ios` skill first, then return here.
 
 Before starting, confirm:
 - **App target name** (e.g. `MyApp`)
