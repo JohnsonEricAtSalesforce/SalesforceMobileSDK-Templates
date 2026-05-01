@@ -11,9 +11,10 @@ This skill integrates the Salesforce Mobile SDK into an existing iOS Swift appli
 
 1. Adds the `SalesforceSDKCore` dependency (CocoaPods **or** Swift Package Manager, matching what the app already uses)
 2. Initializes the SDK in `AppDelegate`
-3. Wires `AuthHelper.loginIfRequired` and user-change notifications into `SceneDelegate`
-4. Adds `bootconfig.plist` with OAuth configuration placeholders
-5. Adds the required `SFDCOAuthLoginHost` key to `Info.plist`
+3. Creates `InitialViewController.swift` — the splash screen shown while the login flow runs
+4. Wires `AuthHelper.loginIfRequired` and user-change notifications into `SceneDelegate`
+5. Adds `bootconfig.plist` with OAuth configuration placeholders
+6. Adds the required `SFDCOAuthLoginHost` key to `Info.plist`
 
 ## Prerequisites
 
@@ -80,7 +81,21 @@ In Xcode:
 
 ---
 
-## Step 2: Update AppDelegate.swift
+## Step 2: Create InitialViewController.swift
+
+Create `InitialViewController.swift` inside the app target's source folder. This is the splash screen that fills the window while the SDK presents the login flow. Using a named subclass instead of a bare `UIViewController` ensures UIKit presents the login screen full-screen rather than as a page sheet, which would leave black bars above and below it.
+
+```swift
+import UIKit
+
+class InitialViewController: UIViewController {}
+```
+
+Add the file to the Xcode target (it must be compiled into the app module so `SceneDelegate` can reference it by name).
+
+---
+
+## Step 3: Update AppDelegate.swift
 
 The key changes from a plain iOS app:
 - `import SalesforceSDKCore`
@@ -119,7 +134,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 ---
 
-## Step 3: Update SceneDelegate.swift
+## Step 4: Update SceneDelegate.swift
 
 The key Mobile SDK additions:
 - `import SalesforceSDKCore`
@@ -162,7 +177,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             DispatchQueue.main.async { self.initializeAppViewState() }
             return
         }
-        window?.rootViewController = UIViewController()   // splash/loading screen while login is presented
+        window?.rootViewController = InitialViewController(nibName: nil, bundle: nil)
         window?.makeKeyAndVisible()
     }
 
@@ -190,7 +205,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 ---
 
-## Step 4: Add bootconfig.plist
+## Step 5: Add bootconfig.plist
 
 Create `bootconfig.plist` inside your app target's source folder (next to `Info.plist`), then add it to the Xcode target via **Add Files to "YourApp"**.
 
@@ -215,7 +230,7 @@ Verify `bootconfig.plist` appears in the **Copy Bundle Resources** build phase f
 
 ---
 
-## Step 5: Update Info.plist
+## Step 6: Update Info.plist
 
 Add the `SFDCOAuthLoginHost` key to the app target's `Info.plist`:
 
@@ -250,14 +265,16 @@ Also ensure the Scene configuration is present (required for `SceneDelegate` to 
 
 ---
 
-## Step 6: Verify the Integration
+## Step 7: Verify the Integration
 
 Build and run. On first launch, the Salesforce login screen should appear. After a successful login, `setupRootViewController()` is called.
 
 ### Checklist
 
 - [ ] SDK dependency added and project builds without errors
+- [ ] `InitialViewController.swift` created and added to the Xcode target
 - [ ] `SalesforceManager.initializeSDK()` called in `AppDelegate.init()`
+- [ ] `initializeAppViewState()` uses `InitialViewController(nibName: nil, bundle: nil)`
 - [ ] `AuthHelper.registerBlock(forCurrentUserChangeNotifications:)` called in `scene(_:willConnectTo:)`
 - [ ] `AuthHelper.loginIfRequired` called in `sceneWillEnterForeground`
 - [ ] `bootconfig.plist` is in the target and in Copy Bundle Resources
