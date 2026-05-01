@@ -27,6 +27,7 @@ Use the directory/`SKILL.md` format so the `npx skills` CLI can discover and ins
 | Skill | Description |
 |---|---|
 | `add-mobile-sdk-ios/` | Add Mobile SDK authentication to an existing iOS Swift app |
+| `create-ios-app-with-mobile-sdk/` | Create a new iOS Swift app from scratch with Mobile SDK already integrated |
 
 ### SDK developer skills (internal)
 
