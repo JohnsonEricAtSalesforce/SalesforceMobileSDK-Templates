@@ -125,9 +125,21 @@ import SalesforceSDKCore   // keep this — AuthHelper lives here
 func setupRootViewController() {
     MobileSyncSDKManager.shared.setupUserStoreFromDefaultConfig()
     MobileSyncSDKManager.shared.setupUserSyncsFromDefaultConfig()
-    window?.rootViewController = UIViewController()
+    let vc = UIViewController()
+    vc.view.backgroundColor = .systemBackground
+    let label = UILabel()
+    label.text = "SmartStore + MobileSync ready"
+    label.translatesAutoresizingMaskIntoConstraints = false
+    vc.view.addSubview(label)
+    NSLayoutConstraint.activate([
+        label.centerXAnchor.constraint(equalTo: vc.view.centerXAnchor),
+        label.centerYAnchor.constraint(equalTo: vc.view.centerYAnchor)
+    ])
+    window?.rootViewController = vc
 }
 ```
+
+After login, you should see **"SmartStore + MobileSync ready"** centered on the screen. This is a smoke test placeholder — replace with your real app UI once verified.
 
 ---
 
@@ -198,6 +210,7 @@ Expected: `** BUILD SUCCEEDED **`
 - [ ] `usersyncs.json` created with at least one sync definition targeting the correct soup
 - [ ] `usersyncs.json` is in the **Copy Bundle Resources** build phase
 - [ ] Project builds without errors
+- [ ] "SmartStore + MobileSync ready" label is shown after login
 
 ---
 

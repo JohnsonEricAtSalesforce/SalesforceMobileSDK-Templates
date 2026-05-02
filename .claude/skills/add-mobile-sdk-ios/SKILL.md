@@ -304,9 +304,33 @@ Also ensure the Scene configuration is present (required for `SceneDelegate` to 
 
 ---
 
-## Step 8: Verify the Integration
+## Step 8: Add a Smoke Test UI
 
-Build and run. On first launch, the Salesforce login screen should appear. After a successful login, `setupRootViewController()` is called.
+Replace the placeholder `setupRootViewController()` with a minimal labeled view so you can confirm the SDK is working after login. This is a temporary smoke test — replace the label and view controller with your real app UI once verified.
+
+```swift
+func setupRootViewController() {
+    let vc = UIViewController()
+    vc.view.backgroundColor = .systemBackground
+    let label = UILabel()
+    label.text = "Mobile SDK ready"
+    label.translatesAutoresizingMaskIntoConstraints = false
+    vc.view.addSubview(label)
+    NSLayoutConstraint.activate([
+        label.centerXAnchor.constraint(equalTo: vc.view.centerXAnchor),
+        label.centerYAnchor.constraint(equalTo: vc.view.centerYAnchor)
+    ])
+    window?.rootViewController = vc
+}
+```
+
+After login, you should see **"Mobile SDK ready"** centered on a white screen.
+
+---
+
+## Step 9: Build and Verify
+
+Build and run. On first launch, the Salesforce login screen should appear. After a successful login, `setupRootViewController()` is called and the label is shown.
 
 ### Checklist
 
@@ -322,7 +346,7 @@ Build and run. On first launch, the Salesforce login screen should appear. After
 - [ ] `remoteAccessConsumerKey` and `oauthRedirectURI` are set in `bootconfig.plist`
 - [ ] `SFDCOAuthLoginHost` is present in `Info.plist`
 - [ ] App prompts for Salesforce login on first launch
-- [ ] `setupRootViewController()` replaced with the real root view controller
+- [ ] "Mobile SDK ready" label is shown after login
 
 ---
 

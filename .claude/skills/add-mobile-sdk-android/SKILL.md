@@ -163,16 +163,28 @@ Use the login host provided by the user, or `https://login.salesforce.com` as th
 
 ## Step 6: Update MainActivity.kt
 
-`MainActivity` must extend `SalesforceActivity` so the SDK can manage the OAuth login lifecycle:
+`MainActivity` must extend `SalesforceActivity` so the SDK can manage the OAuth login lifecycle. Add a smoke test UI in `onCreate` to confirm the SDK is working after login:
 
 ```kotlin
 package <AppPackage>
 
-import com.salesforce.androidsdk.app.SalesforceSDKManager
+import android.os.Bundle
+import android.view.Gravity
+import android.widget.TextView
 import com.salesforce.androidsdk.rest.RestClient
 import com.salesforce.androidsdk.ui.SalesforceActivity
 
 class MainActivity : SalesforceActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val label = TextView(this).apply {
+            text = "Mobile SDK ready"
+            gravity = Gravity.CENTER
+            textSize = 18f
+        }
+        setContentView(label)
+    }
 
     override fun onResume(client: RestClient?) {
         // Called after successful login. client is non-null when logged in.
@@ -180,6 +192,8 @@ class MainActivity : SalesforceActivity() {
     }
 }
 ```
+
+After login, you should see **"Mobile SDK ready"** centered on the screen. This is a smoke test placeholder — replace with your real app UI once verified.
 
 > **`onResume(client: RestClient?)`** is called every time the activity resumes with a valid session. It is the correct place to start loading data. `client` is `null` if the user is not authenticated.
 
@@ -207,6 +221,7 @@ Run on an emulator — the Salesforce login screen should appear on first launch
 - [ ] `servers.xml` created with login host
 - [ ] Project builds without errors
 - [ ] Salesforce login screen appears on first launch
+- [ ] "Mobile SDK ready" label is shown after login
 
 ---
 

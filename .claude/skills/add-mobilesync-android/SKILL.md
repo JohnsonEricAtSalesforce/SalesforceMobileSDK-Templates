@@ -67,11 +67,21 @@ class MainApplication : Application() {
 
 ## Step 3: Add Sync Setup in MainActivity.kt
 
-Add `setupUserSyncsFromDefaultConfig()` alongside the existing store setup call in `onResume`:
+Add `setupUserSyncsFromDefaultConfig()` alongside the existing store setup call in `onResume`. Also update the smoke test label in `onCreate` to reflect MobileSync is now active:
 
 **Before:**
 ```kotlin
 import com.salesforce.androidsdk.smartstore.app.SmartStoreSDKManager
+
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    val label = TextView(this).apply {
+        text = "SmartStore ready"
+        gravity = Gravity.CENTER
+        textSize = 18f
+    }
+    setContentView(label)
+}
 
 override fun onResume(client: RestClient?) {
     if (client == null) return
@@ -82,7 +92,20 @@ override fun onResume(client: RestClient?) {
 
 **After:**
 ```kotlin
+import android.os.Bundle
+import android.view.Gravity
+import android.widget.TextView
 import com.salesforce.androidsdk.mobilesync.app.MobileSyncSDKManager
+
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    val label = TextView(this).apply {
+        text = "SmartStore + MobileSync ready"
+        gravity = Gravity.CENTER
+        textSize = 18f
+    }
+    setContentView(label)
+}
 
 override fun onResume(client: RestClient?) {
     if (client == null) return
@@ -91,6 +114,8 @@ override fun onResume(client: RestClient?) {
     // post-login logic
 }
 ```
+
+After login, you should see **"SmartStore + MobileSync ready"** centered on the screen. This is a smoke test placeholder — replace with your real app UI once verified.
 
 ---
 
@@ -140,10 +165,12 @@ Expected: `BUILD SUCCESSFUL`
 ## Checklist
 
 - [ ] `MainApplication.kt` imports `MobileSyncSDKManager` and calls `MobileSyncSDKManager.initNative()`
+- [ ] `onCreate()` in `MainActivity.kt` shows the "SmartStore + MobileSync ready" smoke test label
 - [ ] `onResume()` in `MainActivity.kt` calls both `setupUserStoreFromDefaultConfig()` and `setupUserSyncsFromDefaultConfig()`
 - [ ] `app/src/main/res/raw/usersyncs.json` created with at least one sync targeting the correct soup
 - [ ] SOQL `FROM` clause references a Salesforce sObject, not the local soup name
 - [ ] Project builds without errors
+- [ ] "SmartStore + MobileSync ready" label is shown after login
 
 ---
 

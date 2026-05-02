@@ -63,7 +63,7 @@ class MainApplication : Application() {
 
 ## Step 3: Set Up the Store After Login in MainActivity.kt
 
-Call `setupUserStoreFromDefaultConfig()` in `onResume`:
+Call `setupUserStoreFromDefaultConfig()` in `onResume`. Also add a smoke test UI in `onCreate` so you can confirm SmartStore is initializing after login:
 
 **Before:**
 ```kotlin
@@ -74,7 +74,20 @@ override fun onResume(client: RestClient?) {
 
 **After:**
 ```kotlin
+import android.os.Bundle
+import android.view.Gravity
+import android.widget.TextView
 import com.salesforce.androidsdk.smartstore.app.SmartStoreSDKManager
+
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    val label = TextView(this).apply {
+        text = "SmartStore ready"
+        gravity = Gravity.CENTER
+        textSize = 18f
+    }
+    setContentView(label)
+}
 
 override fun onResume(client: RestClient?) {
     if (client == null) return
@@ -82,6 +95,8 @@ override fun onResume(client: RestClient?) {
     // post-login logic
 }
 ```
+
+After login, you should see **"SmartStore ready"** centered on the screen. This is a smoke test placeholder — replace with your real app UI once verified.
 
 ---
 
@@ -123,9 +138,11 @@ Expected: `BUILD SUCCESSFUL`
 ## Checklist
 
 - [ ] `MainApplication.kt` imports `SmartStoreSDKManager` and calls `SmartStoreSDKManager.initNative()`
+- [ ] `onCreate()` in `MainActivity.kt` shows the "SmartStore ready" smoke test label
 - [ ] `onResume()` in `MainActivity.kt` calls `setupUserStoreFromDefaultConfig()`
 - [ ] `app/src/main/res/raw/userstore.json` created with at least one soup
 - [ ] Project builds without errors
+- [ ] "SmartStore ready" label is shown after login
 
 ---
 
