@@ -10,11 +10,12 @@ This skill integrates the Salesforce Mobile SDK into an existing iOS Swift appli
 ## What This Skill Does
 
 1. Adds the `SalesforceSDKCore` dependency (CocoaPods **or** Swift Package Manager, matching what the app already uses)
-2. Initializes the SDK in `AppDelegate`
-3. Creates `InitialViewController.swift` — the splash screen shown while the login flow runs
-4. Wires `AuthHelper.loginIfRequired` and user-change notifications into `SceneDelegate`
-5. Adds `bootconfig.plist` with OAuth configuration placeholders
-6. Adds the required `SFDCOAuthLoginHost` key to `Info.plist`
+2. Adds a `LaunchScreen.storyboard` so iOS sizes the window correctly before the SDK presents the login screen
+3. Initializes the SDK in `AppDelegate`
+4. Creates `InitialViewController.swift` — the splash screen shown while the login flow runs
+5. Wires `AuthHelper.loginIfRequired` and user-change notifications into `SceneDelegate`
+6. Adds `bootconfig.plist` with OAuth configuration placeholders
+7. Adds the required `SFDCOAuthLoginHost` and `UILaunchStoryboardName` keys to `Info.plist`
 
 ## Prerequisites
 
@@ -81,7 +82,43 @@ In Xcode:
 
 ---
 
-## Step 2: Create InitialViewController.swift
+## Step 2: Add LaunchScreen.storyboard
+
+Without a launch storyboard, iOS does not properly establish the window's safe-area bounds before the SDK presents its login screen, which causes the login view controller to appear with black bars above and below it.
+
+Create a minimal `LaunchScreen.storyboard` in the app target's source folder:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15400" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15404"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 9 format" minToolsVersion="9.0"/>
+    </dependencies>
+    <scenes>
+        <scene sceneID="EHf-IW-A2E">
+            <objects>
+                <viewController id="01J-lp-oVM" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Ze5-6b-2t3">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <viewLayoutGuide key="safeArea" id="Bcu-3y-fUS"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+        </scene>
+    </scenes>
+</document>
+```
+
+Add `LaunchScreen.storyboard` to the Xcode target's **Copy Bundle Resources** build phase.
+
+---
+
+## Step 3: Create InitialViewController.swift
 
 Create `InitialViewController.swift` inside the app target's source folder. This is the splash screen that fills the window while the SDK presents the login flow. Using a named subclass instead of a bare `UIViewController` ensures UIKit presents the login screen full-screen rather than as a page sheet, which would leave black bars above and below it.
 
@@ -95,7 +132,7 @@ Add the file to the Xcode target (it must be compiled into the app module so `Sc
 
 ---
 
-## Step 3: Update AppDelegate.swift
+## Step 4: Update AppDelegate.swift
 
 The key changes from a plain iOS app:
 - `import SalesforceSDKCore`
@@ -134,7 +171,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 ---
 
-## Step 4: Update SceneDelegate.swift
+## Step 5: Update SceneDelegate.swift
 
 The key Mobile SDK additions:
 - `import SalesforceSDKCore`
@@ -205,7 +242,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 ---
 
-## Step 5: Add bootconfig.plist
+## Step 6: Add bootconfig.plist
 
 Create `bootconfig.plist` inside your app target's source folder (next to `Info.plist`), then add it to the Xcode target via **Add Files to "YourApp"**.
 
@@ -230,13 +267,15 @@ Verify `bootconfig.plist` appears in the **Copy Bundle Resources** build phase f
 
 ---
 
-## Step 6: Update Info.plist
+## Step 7: Update Info.plist
 
-Add the `SFDCOAuthLoginHost` key to the app target's `Info.plist`:
+Add the following keys to the app target's `Info.plist`:
 
 ```xml
 <key>SFDCOAuthLoginHost</key>
 <string>login.salesforce.com</string>
+<key>UILaunchStoryboardName</key>
+<string>LaunchScreen</string>
 ```
 
 Use the login host provided by the user, or `login.salesforce.com` as the default.
@@ -265,13 +304,15 @@ Also ensure the Scene configuration is present (required for `SceneDelegate` to 
 
 ---
 
-## Step 7: Verify the Integration
+## Step 8: Verify the Integration
 
 Build and run. On first launch, the Salesforce login screen should appear. After a successful login, `setupRootViewController()` is called.
 
 ### Checklist
 
 - [ ] SDK dependency added and project builds without errors
+- [ ] `LaunchScreen.storyboard` added and in Copy Bundle Resources
+- [ ] `UILaunchStoryboardName` set to `LaunchScreen` in `Info.plist`
 - [ ] `InitialViewController.swift` created and added to the Xcode target
 - [ ] `SalesforceManager.initializeSDK()` called in `AppDelegate.init()`
 - [ ] `initializeAppViewState()` uses `InitialViewController(nibName: nil, bundle: nil)`
@@ -292,6 +333,9 @@ The import is missing or the framework is not linked. For CocoaPods, verify `pod
 
 **Login screen does not appear**
 Check that `SFDCOAuthLoginHost` is in `Info.plist` and `bootconfig.plist` is included in Copy Bundle Resources.
+
+**Login screen has black bars above and below it**
+`LaunchScreen.storyboard` is missing or not set in `Info.plist` as `UILaunchStoryboardName`. Without it, iOS does not properly establish window bounds before the SDK presents its auth window.
 
 **Login succeeds but app shows blank screen**
 `setupRootViewController()` still has the placeholder `UIViewController()`. Replace it with your app's actual root view controller.

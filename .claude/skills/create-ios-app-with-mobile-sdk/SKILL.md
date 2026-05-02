@@ -82,6 +82,34 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 }
 ```
 
+Create `<AppName>/LaunchScreen.storyboard`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15400" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15404"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 9 format" minToolsVersion="9.0"/>
+    </dependencies>
+    <scenes>
+        <scene sceneID="EHf-IW-A2E">
+            <objects>
+                <viewController id="01J-lp-oVM" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Ze5-6b-2t3">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <viewLayoutGuide key="safeArea" id="Bcu-3y-fUS"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+        </scene>
+    </scenes>
+</document>
+```
+
 ---
 
 ## Step 2: Create project.yml
@@ -102,9 +130,12 @@ targets:
     platform: iOS
     sources:
       - <AppName>
+    resources:
+      - <AppName>/LaunchScreen.storyboard
     info:
       path: <AppName>/Info.plist
       properties:
+        UILaunchStoryboardName: LaunchScreen
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
           UISceneConfigurations:
@@ -113,7 +144,7 @@ targets:
                 UISceneDelegateClassName: $(PRODUCT_MODULE_NAME).SceneDelegate
 ```
 
-> **Note:** `UILaunchStoryboardName` is intentionally omitted. Apps created with this skill use a programmatic window setup and do not require a launch storyboard.
+> **Note:** `UILaunchStoryboardName` is required. Without a launch storyboard, iOS does not properly establish the window's bounds before the SDK presents its login screen, resulting in black bars above and below the login UI.
 
 ---
 
@@ -179,7 +210,8 @@ Run on the simulator — the Salesforce login screen should appear on first laun
 
 - [ ] Project directory created with `<AppName>` subdirectory for sources
 - [ ] `AppDelegate.swift` and `SceneDelegate.swift` created
-- [ ] `project.yml` created with correct bundle ID and deployment target
+- [ ] `LaunchScreen.storyboard` created
+- [ ] `project.yml` created with correct bundle ID, deployment target, and `UILaunchStoryboardName`
 - [ ] `xcodegen generate` completed without errors
 - [ ] `add-mobile-sdk-ios` skill applied
 - [ ] `pod install` run (CocoaPods path) or SPM package added in Xcode (SPM path)
