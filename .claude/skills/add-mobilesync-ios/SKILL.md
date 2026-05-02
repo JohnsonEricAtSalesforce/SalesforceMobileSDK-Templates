@@ -144,7 +144,7 @@ Create `usersyncs.json` inside the app target's source folder (next to `userstor
       "soupName": "<SoupName>",
       "target": {
         "type": "soql",
-        "query": "SELECT Id, Name FROM <SoupName> LIMIT 100"
+        "query": "SELECT Id, Name FROM <SalesforceObject> LIMIT 100"
       },
       "options": {
         "mergeMode": "LEAVE_IF_CHANGED"
@@ -154,7 +154,11 @@ Create `usersyncs.json` inside the app target's source folder (next to `userstor
 }
 ```
 
-Replace `<SoupName>` with the soup name used in `userstore.json`.
+Replace:
+- `<SoupName>` with the soup name used in `userstore.json` — this is the **local** SmartStore table name
+- `<SalesforceObject>` in the SOQL `FROM` clause with the **Salesforce sObject API name** to sync from (e.g. `Account`, `Contact`, `Opportunity`) — this query runs on the server, not against the local store
+
+> The soup name and the sObject name are often the same (e.g. soup `Account`, query `FROM Account`) but they don't have to be. The soup is a local storage concept; the SOQL target is a server-side Salesforce object.
 
 Then add `usersyncs.json` to the Xcode target:
 - In Xcode, right-click the app target group → **Add Files to "YourApp"**
