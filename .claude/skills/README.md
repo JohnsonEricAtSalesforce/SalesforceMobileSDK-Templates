@@ -26,25 +26,28 @@ Use the directory/`SKILL.md` format so the `npx skills` CLI can discover and ins
 
 | Skill | Description |
 |---|---|
-| `add-mobile-sdk-ios/` | Add Mobile SDK authentication to an existing iOS Swift app |
 | `create-ios-app-with-mobile-sdk/` | Create a new iOS Swift app from scratch with Mobile SDK already integrated |
+| `add-mobile-sdk-ios/` | Add Mobile SDK authentication to an existing iOS Swift app |
+| `add-smartstore-ios/` | Add SmartStore (encrypted local database) to an iOS Swift app that already has Mobile SDK |
+| `add-mobilesync-ios/` | Add MobileSync (cloud data sync) to an iOS Swift app that already has SmartStore |
 
 ### SDK developer skills (internal)
 
 Skills intended for **developers working on Mobile SDK itself** (contributors, maintainers). These are hidden from the default skill listing and only loaded by Claude Code when the repo is open locally — the `npx skills` CLI is not the delivery mechanism.
 
-Because they are only ever used via local repo clone, a flat `.md` file is sufficient (no need for a subdirectory):
+They use the same directory/`SKILL.md` format as consumer skills, but include `metadata.internal: true` in their frontmatter:
 
 ```
 .claude/skills/
-  my-sdk-skill.md
+  my-sdk-skill/
+    SKILL.md
 ```
 
 | Skill | Description |
 |---|---|
-| `remove-template.md` | Remove a template from this repository |
-| `test-template.md` | Test templates with `test_template.sh` |
-| `update-ios-deployment-target.md` | Bump the minimum iOS deployment target across all templates |
+| `remove-template/` | Remove a template from this repository |
+| `test-template/` | Test templates with `test_template.sh` |
+| `update-ios-deployment-target/` | Bump the minimum iOS deployment target across all templates |
 
 ## Adding a New Skill
 
@@ -99,7 +102,7 @@ Expected: `** BUILD SUCCEEDED **` and Salesforce login screen on first run.
 
 ---
 
-**SDK developer skill** — create a flat `.md` file with `metadata.internal: true`:
+**SDK developer skill** — create a subdirectory with a `SKILL.md` that includes `metadata.internal: true`:
 
 ```markdown
 ---
