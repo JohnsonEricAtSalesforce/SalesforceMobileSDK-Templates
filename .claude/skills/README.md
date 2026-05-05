@@ -30,6 +30,9 @@ Use the directory/`SKILL.md` format so the `npx skills` CLI can discover and ins
 | `add-mobile-sdk-ios/` | Add Mobile SDK authentication to an existing iOS Swift app |
 | `add-smartstore-ios/` | Add SmartStore (encrypted local database) to an iOS Swift app that already has Mobile SDK |
 | `add-mobilesync-ios/` | Add MobileSync (cloud data sync) to an iOS Swift app that already has SmartStore |
+| `add-mobile-sdk-android/` | Add Mobile SDK authentication to an existing Android Kotlin app |
+| `add-smartstore-android/` | Add SmartStore (encrypted local database) to an Android Kotlin app that already has Mobile SDK |
+| `add-mobilesync-android/` | Add MobileSync (cloud data sync) to an Android Kotlin app that already has SmartStore |
 
 ### SDK developer skills (internal)
 
