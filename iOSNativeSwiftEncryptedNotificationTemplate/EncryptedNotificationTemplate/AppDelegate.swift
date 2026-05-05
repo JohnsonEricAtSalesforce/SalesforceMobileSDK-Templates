@@ -46,20 +46,6 @@ class AppDelegate : UIResponder, UIApplicationDelegate {
     
     // MARK: - App delegate lifecycle
 
-    func applicationWillEnterForeground(_ application: UIApplication) {
-        // Re-fetch notification type definitions from the server each time the app foregrounds.
-        // This keeps action button definitions up to date if they change while the app is backgrounded,
-        // without requiring a full push re-registration.
-        guard UserAccountManager.shared.currentUserAccount != nil else { return }
-        Task {
-            do {
-                try await PushNotificationManager.sharedInstance().fetchAndStoreNotificationTypes()
-            } catch {
-                SalesforceLogger.e(AppDelegate.self, message: "Failed to refresh notification types on foreground: \(error)")
-            }
-        }
-    }
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         self.window = UIWindow(frame: UIScreen.main.bounds)
         self.initializeAppViewState()
