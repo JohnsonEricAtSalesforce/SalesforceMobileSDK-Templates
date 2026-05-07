@@ -104,7 +104,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 ## Step 3: Set Up the Store After Login in SceneDelegate.swift
 
-Add a `SmartStore` import and call `setupUserStoreFromDefaultConfig()` inside `setupRootViewController()`.
+Add a `SmartStore` import and call `setupUserStoreFromDefaultConfig()` inside `setupRootViewController()`. Also add a smoke test label so you can confirm SmartStore is initializing correctly.
 
 **Before:**
 ```swift
@@ -126,9 +126,21 @@ import SalesforceSDKCore   // keep this — AuthHelper lives here
 
 func setupRootViewController() {
     SmartStoreSDKManager.shared.setupUserStoreFromDefaultConfig()
-    window?.rootViewController = UIViewController()
+    let vc = UIViewController()
+    vc.view.backgroundColor = .systemBackground
+    let label = UILabel()
+    label.text = "SmartStore ready"
+    label.translatesAutoresizingMaskIntoConstraints = false
+    vc.view.addSubview(label)
+    NSLayoutConstraint.activate([
+        label.centerXAnchor.constraint(equalTo: vc.view.centerXAnchor),
+        label.centerYAnchor.constraint(equalTo: vc.view.centerYAnchor)
+    ])
+    window?.rootViewController = vc
 }
 ```
+
+After login, you should see **"SmartStore ready"** centered on the screen. This is a smoke test placeholder — replace with your real app UI once verified.
 
 ---
 
@@ -191,6 +203,7 @@ Expected: `** BUILD SUCCEEDED **`
 - [ ] `userstore.json` created with at least one soup
 - [ ] `userstore.json` is in the **Copy Bundle Resources** build phase
 - [ ] Project builds without errors
+- [ ] "SmartStore ready" label is shown after login
 
 ---
 
