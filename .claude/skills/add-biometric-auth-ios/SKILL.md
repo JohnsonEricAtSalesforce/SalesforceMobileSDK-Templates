@@ -87,7 +87,7 @@ func setupRootViewController() {
         error: &laError
     )
 
-    let bioManager = BiometricAuthenticationManagerInternal.shared
+    let bioManager = SalesforceManager.shared.biometricAuthenticationManager()
     if bioManager.enabled && deviceHasBiometrics && !bioManager.hasBiometricOptedIn() {
         if let vc = window?.rootViewController {
             bioManager.presentOptInDialog(viewController: vc)
@@ -98,7 +98,7 @@ func setupRootViewController() {
 }
 ```
 
-> **`BiometricAuthenticationManagerInternal.shared`** is the concrete singleton that implements the `BiometricAuthenticationManager` protocol. It lives in `SalesforceSDKCore`. No additional import beyond `SalesforceSDKCore` (or its subframework) is needed.
+> **`SalesforceManager.shared.biometricAuthenticationManager()`** returns the biometric authentication manager instance that conforms to the `BiometricAuthenticationManager` protocol. It lives in `SalesforceSDKCore`. No additional import beyond `SalesforceSDKCore` (or its subframework) is needed.
 
 > **When to call `presentOptInDialog`**: Call it every time `setupRootViewController()` runs. The `hasBiometricOptedIn()` guard ensures it only shows once per user. If you already show it and they dismiss without choosing, it will reappear next session — that is correct behaviour.
 
@@ -133,7 +133,7 @@ Expected: `** BUILD SUCCEEDED **`
 
 - [ ] `NSFaceIDUsageDescription` added to `Info.plist`
 - [ ] `import LocalAuthentication` added to `SceneDelegate.swift`
-- [ ] `BiometricAuthenticationManagerInternal.shared` opt-in check added in `setupRootViewController()`
+- [ ] `SalesforceManager.shared.biometricAuthenticationManager()` opt-in check added in `setupRootViewController()`
 - [ ] Project builds without errors
 - [ ] Opt-in dialog appears after first login
 - [ ] Biometric prompt appears after app returns from background (device / enrolled simulator)
@@ -145,7 +145,7 @@ Expected: `** BUILD SUCCEEDED **`
 By default the SDK shows a **Use Biometrics** button on the Salesforce login screen. To hide it (e.g. you want to control the UX entirely from your own UI):
 
 ```swift
-BiometricAuthenticationManagerInternal.shared.enableNativeBiometricLoginButton(enabled: false)
+SalesforceManager.shared.biometricAuthenticationManager().enableNativeBiometricLoginButton(enabled: false)
 ```
 
 Call this once during app startup, before the login screen is shown — `AppDelegate.init()` is a good place.
@@ -154,7 +154,7 @@ Call this once during app startup, before the login screen is shown — `AppDele
 
 ## Troubleshooting
 
-**Build error: `Cannot find type 'BiometricAuthenticationManagerInternal'`**
+**Build error: `Value of type 'SalesforceSDKManager' has no member 'biometricAuthenticationManager'`**
 `SalesforceSDKCore` is not linked or the import is missing. Verify `pod install` completed and you opened `.xcworkspace`.
 
 **Opt-in dialog never appears**
@@ -164,4 +164,4 @@ Call this once during app startup, before the login screen is shown — `AppDele
 The key is missing from `Info.plist`. This crash happens at the OS level when Face ID is triggered — add the key as described in Step 1.
 
 **Biometric prompt does not appear after backgrounding**
-The inactivity timeout has not elapsed. Either wait for the configured timeout, or call `BiometricAuthenticationManagerInternal.shared.lock()` programmatically to force-lock the app immediately for testing.
+The inactivity timeout has not elapsed. Either wait for the configured timeout, or call `SalesforceManager.shared.biometricAuthenticationManager().lock()` programmatically to force-lock the app immediately for testing.
