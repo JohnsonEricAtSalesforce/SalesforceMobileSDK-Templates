@@ -51,6 +51,7 @@ They use the same directory/`SKILL.md` format as consumer skills, but include `m
 |---|---|
 | `remove-template/` | Remove a template from this repository |
 | `test-template/` | Test templates with `test_template.sh` |
+| `test-sdk-consumer-skills/` | End-to-end test harness for all SDK consumer skills |
 | `update-ios-deployment-target/` | Bump the minimum iOS deployment target across all templates |
 
 ## Adding a New Skill
