@@ -25,6 +25,9 @@ SalesforceMobileSDK-Templates/
 ├── test_template.sh                       # Template testing script
 ├── TESTING.md                             # Testing documentation
 ├── setversion.sh                          # Version update script
+├── .claude/
+│   └── skills/                            # Claude Code agent skills (see below)
+│       └── README.md                      # Skills documentation
 │
 ├── iOSNativeSwiftTemplate/                # Swift iOS template (most common)
 │   ├── package.json                       # SDK dependencies
@@ -588,9 +591,58 @@ Updates `sdkDependencies` in all `package.json` files to reference the specified
 - **Install Script**: `install.js` downloads SDK dependencies and runs platform setup
 - **Template Script**: `template.js` customizes template with user inputs
 
+## Claude Code Skills
+
+This repository provides [Claude Code agent skills](https://code.claude.com/docs/en/skills) for two audiences:
+
+### Consumer Skills
+
+Skills for **developers building apps with Mobile SDK** (SDK consumers). These are publicly installable:
+
+```bash
+npx skills add forcedotcom/SalesforceMobileSDK-Templates
+```
+
+Available consumer skills:
+- `create-ios-app-with-mobile-sdk` - Create a new iOS Swift app from scratch with Mobile SDK
+- `create-android-app-with-mobile-sdk` - Create a new Android Kotlin app from scratch with Mobile SDK
+- `add-mobile-sdk-ios` - Add Mobile SDK to an existing iOS Swift app
+- `add-mobile-sdk-android` - Add Mobile SDK to an existing Android Kotlin app
+- `add-smartstore-ios` - Add SmartStore (encrypted local database) to an iOS app
+- `add-smartstore-android` - Add SmartStore to an Android app
+- `add-mobilesync-ios` - Add MobileSync (cloud data sync) to an iOS app
+- `add-mobilesync-android` - Add MobileSync to an Android app
+
+### SDK Developer Skills (Internal)
+
+Skills for **developers working on Mobile SDK itself** (contributors, maintainers). These are marked `metadata.internal: true` and only loaded when the repo is open locally:
+
+- `remove-template` - Remove a template from this repository
+- `test-template` - Test templates with `test_template.sh`
+- `test-sdk-consumer-skills` - End-to-end test harness for all SDK consumer skills
+- `update-ios-deployment-target` - Bump the minimum iOS deployment target across all templates
+
+### Maintaining Skills
+
+**IMPORTANT**: When adding, removing, or modifying skills in `.claude/skills/`, you MUST update `.claude/skills/README.md` to keep the skill inventory in sync. The README serves as the authoritative documentation for all available skills.
+
+When adding a new skill:
+1. Create the skill directory and `SKILL.md` file
+2. Add an entry to the appropriate table in `.claude/skills/README.md`
+3. If it's a consumer skill, test it end-to-end before shipping (see testing section in README)
+
+When removing a skill:
+1. Delete the skill directory
+2. Remove the entry from `.claude/skills/README.md`
+
+When modifying a skill:
+1. Update the `SKILL.md` file
+2. If the description changes, update the corresponding table entry in `.claude/skills/README.md`
+
 ## Related Documentation
 
 - **TESTING.md**: Comprehensive testing guide with `test_template.sh` usage
+- **.claude/skills/README.md**: Complete skills documentation and testing guide
 - **Package Repo**: See `SalesforceMobileSDK-Package/CLAUDE.md` for CLI tools that consume templates
 - **Package createHelper**: See `SalesforceMobileSDK-Package/shared/createHelper.js` for orchestration logic
 - **Mobile SDK Development Guide**: https://developer.salesforce.com/docs/platform/mobile-sdk/guide
