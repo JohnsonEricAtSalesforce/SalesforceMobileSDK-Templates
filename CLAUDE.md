@@ -612,6 +612,8 @@ Available consumer skills:
 - `add-smartstore-android` - Add SmartStore to an Android app
 - `add-mobilesync-ios` - Add MobileSync (cloud data sync) to an iOS app
 - `add-mobilesync-android` - Add MobileSync to an Android app
+- `add-biometric-auth-ios` - Add biometric authentication (Face ID / Touch ID) to an iOS app
+- `add-biometric-auth-android` - Add biometric authentication (fingerprint / face / iris) to an Android app
 
 ### SDK Developer Skills (Internal)
 

@@ -1,6 +1,6 @@
 ---
 name: test-sdk-consumer-skills
-description: End-to-end test harness for all SDK consumer skills. Creates 8 apps (4 iOS, 4 Android) in parallel, one per consumer skill, builds each, and reports results.
+description: End-to-end test harness for all SDK consumer skills. Creates 10 apps (5 iOS, 5 Android) in parallel, one per consumer skill, builds each, and reports results.
 metadata:
   internal: true
 ---
@@ -17,10 +17,12 @@ End-to-end test harness that exercises every consumer skill by creating a fresh 
 | 2 | `SkillTest_iOS_SDK` | iOS (CocoaPods) | `add-mobile-sdk-ios` |
 | 3 | `SkillTest_iOS_SmartStore` | iOS (CocoaPods) | `add-mobile-sdk-ios` + `add-smartstore-ios` |
 | 4 | `SkillTest_iOS_MobileSync` | iOS (CocoaPods) | `add-mobile-sdk-ios` + `add-smartstore-ios` + `add-mobilesync-ios` |
-| 5 | `SkillTest_Android_Full` | Android (Gradle) | `create-android-app-with-mobile-sdk` |
-| 6 | `SkillTest_Android_SDK` | Android (Gradle) | `add-mobile-sdk-android` |
-| 7 | `SkillTest_Android_SmartStore` | Android (Gradle) | `add-mobile-sdk-android` + `add-smartstore-android` |
-| 8 | `SkillTest_Android_MobileSync` | Android (Gradle) | `add-mobile-sdk-android` + `add-smartstore-android` + `add-mobilesync-android` |
+| 5 | `SkillTest_iOS_Biometric` | iOS (CocoaPods) | `add-mobile-sdk-ios` + `add-biometric-auth-ios` |
+| 6 | `SkillTest_Android_Full` | Android (Gradle) | `create-android-app-with-mobile-sdk` |
+| 7 | `SkillTest_Android_SDK` | Android (Gradle) | `add-mobile-sdk-android` |
+| 8 | `SkillTest_Android_SmartStore` | Android (Gradle) | `add-mobile-sdk-android` + `add-smartstore-android` |
+| 9 | `SkillTest_Android_MobileSync` | Android (Gradle) | `add-mobile-sdk-android` + `add-smartstore-android` + `add-mobilesync-android` |
+| 10 | `SkillTest_Android_Biometric` | Android (Gradle) | `add-mobile-sdk-android` + `add-biometric-auth-android` |
 
 ## Prerequisites
 
@@ -37,7 +39,7 @@ which xcodegen && which pod && echo $ANDROID_HOME && java -version
 
 ## Step 1: Choose an Output Directory
 
-All 8 apps are created under a single parent directory. Default: `/tmp/SdkSkillsTest_<timestamp>`.
+All 10 apps are created under a single parent directory. Default: `/tmp/SdkSkillsTest_<timestamp>`.
 
 ```bash
 BASE=/tmp/SdkSkillsTest_$(date +%Y%m%d_%H%M%S)
@@ -297,7 +299,14 @@ The `create-ios-app-with-mobile-sdk` skill handles scaffolding + SDK wiring in o
 4. Apply `add-mobilesync-ios` (soup: `Item`, sObject: `Contact`)
 5. `pod install`
 
-### App 5 — Android Full (create-android-app-with-mobile-sdk)
+### App 5 — iOS Biometric (add-mobile-sdk-ios → add-biometric-auth-ios)
+
+1. Run `scaffold_ios SkillTest_iOS_Biometric com.skilltest.ios.biometric $BASE`
+2. Apply `add-mobile-sdk-ios` (CocoaPods path, placeholders for OAuth)
+3. Apply `add-biometric-auth-ios`
+4. `pod install`
+
+### App 6 — Android Full (create-android-app-with-mobile-sdk)
 
 The `create-android-app-with-mobile-sdk` skill handles scaffolding + SDK wiring. Invoke it with:
 - App name: `SkillTest_Android_Full`
@@ -305,21 +314,26 @@ The `create-android-app-with-mobile-sdk` skill handles scaffolding + SDK wiring.
 - Output directory: `$BASE`
 - Consumer key / callback URL / login host: leave as placeholders
 
-### App 6 — Android SDK only (add-mobile-sdk-android)
+### App 7 — Android SDK only (add-mobile-sdk-android)
 
 1. Run `scaffold_android SkillTest_Android_SDK com.skilltest.android.sdk $BASE`
 2. App is fully wired by the scaffold (the scaffold already includes the SDK wiring from `add-mobile-sdk-android`)
 
-### App 7 — Android SmartStore (add-mobile-sdk-android → add-smartstore-android)
+### App 8 — Android SmartStore (add-mobile-sdk-android → add-smartstore-android)
 
 1. Run `scaffold_android SkillTest_Android_SmartStore com.skilltest.android.smartstore $BASE`
 2. Apply `add-smartstore-android` (soup name: `Item`)
 
-### App 8 — Android MobileSync (add-mobile-sdk-android → add-smartstore-android → add-mobilesync-android)
+### App 9 — Android MobileSync (add-mobile-sdk-android → add-smartstore-android → add-mobilesync-android)
 
 1. Run `scaffold_android SkillTest_Android_MobileSync com.skilltest.android.mobilesync $BASE`
 2. Apply `add-smartstore-android` (soup name: `Item`)
 3. Apply `add-mobilesync-android` (soup: `Item`, sObject: `Contact`)
+
+### App 10 — Android Biometric (add-mobile-sdk-android → add-biometric-auth-android)
+
+1. Run `scaffold_android SkillTest_Android_Biometric com.skilltest.android.biometric $BASE`
+2. Apply `add-biometric-auth-android`
 
 ## Step 4: Build All Apps
 
@@ -336,7 +350,7 @@ echo "Using simulator: $SIM_ID"
 Then build:
 
 ```bash
-for APP in SkillTest_iOS_Full SkillTest_iOS_SDK SkillTest_iOS_SmartStore SkillTest_iOS_MobileSync; do
+for APP in SkillTest_iOS_Full SkillTest_iOS_SDK SkillTest_iOS_SmartStore SkillTest_iOS_MobileSync SkillTest_iOS_Biometric; do
   (
     cd "$BASE/$APP"
     xcodebuild \
@@ -356,7 +370,7 @@ wait
 ### Android builds (run in parallel)
 
 ```bash
-for APP in SkillTest_Android_Full SkillTest_Android_SDK SkillTest_Android_SmartStore SkillTest_Android_MobileSync; do
+for APP in SkillTest_Android_Full SkillTest_Android_SDK SkillTest_Android_SmartStore SkillTest_Android_MobileSync SkillTest_Android_Biometric; do
   (
     cd "$BASE/$APP"
     ./gradlew assembleDebug \
@@ -370,19 +384,19 @@ wait
 
 ## Step 5: Report Results
 
-Print a summary and the locations of all 8 apps:
+Print a summary and the locations of all 10 apps:
 
 ```bash
 echo ""
 echo "=== SDK Consumer Skills Test Results ==="
 echo ""
 echo "iOS apps (open .xcworkspace in Xcode to run on simulator):"
-for APP in SkillTest_iOS_Full SkillTest_iOS_SDK SkillTest_iOS_SmartStore SkillTest_iOS_MobileSync; do
+for APP in SkillTest_iOS_Full SkillTest_iOS_SDK SkillTest_iOS_SmartStore SkillTest_iOS_MobileSync SkillTest_iOS_Biometric; do
   echo "  $BASE/$APP/${APP}.xcworkspace"
 done
 echo ""
 echo "Android apps (open directory in Android Studio to run on emulator):"
-for APP in SkillTest_Android_Full SkillTest_Android_SDK SkillTest_Android_SmartStore SkillTest_Android_MobileSync; do
+for APP in SkillTest_Android_Full SkillTest_Android_SDK SkillTest_Android_SmartStore SkillTest_Android_MobileSync SkillTest_Android_Biometric; do
   echo "  $BASE/$APP"
 done
 echo ""
@@ -399,10 +413,12 @@ For each app, open it in Xcode / Android Studio and run it on a simulator/emulat
 | `SkillTest_iOS_SDK` | Same as above |
 | `SkillTest_iOS_SmartStore` | Salesforce login screen; "SmartStore ready" after login |
 | `SkillTest_iOS_MobileSync` | Salesforce login screen; "SmartStore + MobileSync ready" after login |
+| `SkillTest_iOS_Biometric` | Salesforce login screen; biometric opt-in dialog after login |
 | `SkillTest_Android_Full` | Salesforce login screen on first launch; "Mobile SDK ready" after login |
 | `SkillTest_Android_SDK` | Same as above |
 | `SkillTest_Android_SmartStore` | Salesforce login screen; "SmartStore ready" after login |
 | `SkillTest_Android_MobileSync` | Salesforce login screen; "SmartStore + MobileSync ready" after login |
+| `SkillTest_Android_Biometric` | Salesforce login screen; biometric opt-in dialog after login |
 
 ## Troubleshooting
 
