@@ -10,16 +10,8 @@ The `npx skills` CLI scans this `./skills/` directory for subdirectories contain
 
 | Skill | Description |
 |---|---|
-| `create-ios-app-with-mobile-sdk/` | Create a new iOS Swift app from scratch with Mobile SDK already integrated |
-| `create-android-app-with-mobile-sdk/` | Create a new Android Kotlin app from scratch with Mobile SDK already integrated |
-| `add-mobile-sdk-ios/` | Add Mobile SDK authentication to an existing iOS Swift app |
-| `add-smartstore-ios/` | Add SmartStore (encrypted local database) to an iOS Swift app that already has Mobile SDK |
-| `add-mobilesync-ios/` | Add MobileSync (cloud data sync) to an iOS Swift app that already has SmartStore |
-| `add-biometric-auth-ios/` | Add biometric authentication (Face ID / Touch ID) to an iOS Swift app that already has Mobile SDK |
-| `add-mobile-sdk-android/` | Add Mobile SDK authentication to an existing Android Kotlin app |
-| `add-smartstore-android/` | Add SmartStore (encrypted local database) to an Android Kotlin app that already has Mobile SDK |
-| `add-mobilesync-android/` | Add MobileSync (cloud data sync) to an Android Kotlin app that already has SmartStore |
-| `add-biometric-auth-android/` | Add biometric authentication (fingerprint / face / iris) to an Android Kotlin app that already has Mobile SDK |
+| `ios-mobile-sdk/` | Comprehensive guide for integrating Salesforce Mobile SDK into iOS Swift applications. Uses progressive disclosure to guide you through scenarios: creating new apps, adding SDK authentication, SmartStore (encrypted database), MobileSync (cloud sync), and biometric authentication (Face ID / Touch ID). |
+| `android-mobile-sdk/` | Comprehensive guide for integrating Salesforce Mobile SDK into Android Kotlin applications. Uses progressive disclosure to guide you through scenarios: creating new apps, adding SDK authentication, SmartStore (encrypted database), MobileSync (cloud sync), and biometric authentication (fingerprint / face / iris). |
 
 > SDK-developer skills (for contributors working on the Mobile SDK itself) live in [`.claude/skills/`](../.claude/skills/) and are not published through this CLI.
 
@@ -37,25 +29,36 @@ description: What this skill does and when to use it
 ...
 ```
 
+## Using the Skills
+
+Each skill uses **progressive disclosure** to guide you through the right scenario:
+
+1. Invoke the skill for your platform (`ios-mobile-sdk` or `android-mobile-sdk`)
+2. Answer the initial question about your scenario (create new app, add SDK, add SmartStore, etc.)
+3. Follow the section-specific instructions for your use case
+
+All scenarios for a platform are now in one skill, making it easier to discover capabilities and navigate between related tasks.
+
 ## Testing a Consumer Skill
 
-Before shipping a new consumer skill, exercise it against a real blank app to verify it produces a working result end-to-end.
+Before shipping a new or updated consumer skill, exercise it against a real blank app to verify it produces a working result end-to-end.
 
 ### Process
 
-1. **Create a blank app** using `xcodegen` (or Xcode's new project wizard) in a temp directory
-2. **Apply the skill** — run Claude Code in that directory and invoke the skill
-3. **Build** — `xcodebuild` against a simulator to confirm no compile errors
-4. **Run on simulator** — verify the skill's core behaviour (e.g. login screen appears, SDK initializes)
-5. **Clean up** — delete the temp directory after validation
+1. **Create a blank app** using `xcodegen` (iOS) or Gradle (Android) in a temp directory
+2. **Apply the skill** — run Claude Code in that directory and invoke the skill, selecting the appropriate scenario
+3. **Build** — `xcodebuild` (iOS) or `./gradlew assembleDebug` (Android) to confirm no compile errors
+4. **Run on simulator/emulator** — verify the skill's core behaviour (e.g. login screen appears, SDK initializes)
+5. **Test additional scenarios** — if the skill covers multiple scenarios (e.g., add SmartStore after SDK), test the progression
+6. **Clean up** — delete the temp directory after validation
 
-### Example: testing `add-mobile-sdk-ios`
+### Example: testing `ios-mobile-sdk` (Add SDK scenario)
 
 ```bash
 mkdir /tmp/SkillTest && cd /tmp/SkillTest
 # ... write project.yml, generate with xcodegen ...
 
-# Apply the skill (Claude Code invokes it), then build:
+# Apply the skill (Claude Code invokes it), select "Add Mobile SDK" scenario, then build:
 xcodebuild -workspace SkillTest.xcworkspace \
   -scheme SkillTest \
   -sdk iphonesimulator \
@@ -71,3 +74,5 @@ Expected: `** BUILD SUCCEEDED **` and Salesforce login screen on first run.
 - [ ] Login screen appears on first launch
 - [ ] Post-login screen is reachable
 - [ ] No crash on cold start
+- [ ] Progressive disclosure flow is clear and easy to navigate
+- [ ] Each scenario's instructions are self-contained and work independently
