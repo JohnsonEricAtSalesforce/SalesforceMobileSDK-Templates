@@ -57,8 +57,8 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
+    kotlin {
+        jvmToolchain(17)
     }
 
     buildFeatures {
@@ -82,12 +82,12 @@ android {
     sourceSets {
         getByName("main") {
             manifest.srcFile("AndroidManifest.xml")
-            java.srcDirs(arrayOf("src/main/java"))
-            resources.srcDirs(arrayOf("src/main/java"))
-            aidl.srcDirs(arrayOf("src/main"))
-            renderscript.srcDirs(arrayOf("src/main"))
-            res.srcDirs(arrayOf("src/main/res"))
-            assets.srcDirs(arrayOf("src/main/assets"))
+            java.directories.add("src/main/java")
+            resources.directories.add("src/main/java")
+            aidl.directories.add("src/main")
+            renderscript.directories.add("src/main")
+            res.directories.add("src/main/res")
+            assets.directories.add("src/main/assets")
         }
     }
 }
