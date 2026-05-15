@@ -1,6 +1,7 @@
 plugins {
     android
     `kotlin-android`
+    kotlin("plugin.compose") version "2.3.20"
 }
 
 dependencies {
