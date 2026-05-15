@@ -1,26 +1,28 @@
 ---
 name: test-sdk-consumer-skills
-description: End-to-end test harness for all SDK consumer skills. Creates 10 apps (5 iOS, 5 Android) in parallel, one per consumer skill, builds each, and reports results.
+description: End-to-end test harness for the consolidated SDK consumer skills. Creates 10 apps (5 iOS, 5 Android) in parallel, one per scenario within the ios-mobile-sdk and android-mobile-sdk skills, builds each, and reports results.
 ---
 
 # Test SDK Consumer Skills
 
-End-to-end test harness that exercises every consumer skill by creating a fresh app for each one, applying the skill, building the result, and reporting a pass/fail summary alongside the paths so the user can do further manual testing.
+End-to-end test harness that exercises every scenario within the consolidated `ios-mobile-sdk` and `android-mobile-sdk` skills by creating a fresh app for each one, applying the appropriate skill scenario, building the result, and reporting a pass/fail summary alongside the paths so the user can do further manual testing.
+
+The consolidated skills use progressive disclosure, so this test harness validates that each scenario path (create app, add SDK, add SmartStore, add MobileSync, add biometric auth) produces buildable, working apps.
 
 ## Apps Created
 
-| # | Name | Platform | Skills Applied |
-|---|------|----------|----------------|
-| 1 | `SkillTest_iOS_Full` | iOS (CocoaPods) | `create-ios-app-with-mobile-sdk` |
-| 2 | `SkillTest_iOS_SDK` | iOS (CocoaPods) | `add-mobile-sdk-ios` |
-| 3 | `SkillTest_iOS_SmartStore` | iOS (CocoaPods) | `add-mobile-sdk-ios` + `add-smartstore-ios` |
-| 4 | `SkillTest_iOS_MobileSync` | iOS (CocoaPods) | `add-mobile-sdk-ios` + `add-smartstore-ios` + `add-mobilesync-ios` |
-| 5 | `SkillTest_iOS_Biometric` | iOS (CocoaPods) | `add-mobile-sdk-ios` + `add-biometric-auth-ios` |
-| 6 | `SkillTest_Android_Full` | Android (Gradle) | `create-android-app-with-mobile-sdk` |
-| 7 | `SkillTest_Android_SDK` | Android (Gradle) | `add-mobile-sdk-android` |
-| 8 | `SkillTest_Android_SmartStore` | Android (Gradle) | `add-mobile-sdk-android` + `add-smartstore-android` |
-| 9 | `SkillTest_Android_MobileSync` | Android (Gradle) | `add-mobile-sdk-android` + `add-smartstore-android` + `add-mobilesync-android` |
-| 10 | `SkillTest_Android_Biometric` | Android (Gradle) | `add-mobile-sdk-android` + `add-biometric-auth-android` |
+| # | Name | Platform | Skill + Scenario Applied |
+|---|------|----------|--------------------------|
+| 1 | `SkillTest_iOS_Full` | iOS (CocoaPods) | `ios-mobile-sdk` → "Create New App" |
+| 2 | `SkillTest_iOS_SDK` | iOS (CocoaPods) | `ios-mobile-sdk` → "Add Mobile SDK" |
+| 3 | `SkillTest_iOS_SmartStore` | iOS (CocoaPods) | `ios-mobile-sdk` → "Add Mobile SDK" → "Add SmartStore" |
+| 4 | `SkillTest_iOS_MobileSync` | iOS (CocoaPods) | `ios-mobile-sdk` → "Add Mobile SDK" → "Add SmartStore" → "Add MobileSync" |
+| 5 | `SkillTest_iOS_Biometric` | iOS (CocoaPods) | `ios-mobile-sdk` → "Add Mobile SDK" → "Add Biometric Auth" |
+| 6 | `SkillTest_Android_Full` | Android (Gradle) | `android-mobile-sdk` → "Create New App" |
+| 7 | `SkillTest_Android_SDK` | Android (Gradle) | `android-mobile-sdk` → "Add Mobile SDK" |
+| 8 | `SkillTest_Android_SmartStore` | Android (Gradle) | `android-mobile-sdk` → "Add Mobile SDK" → "Add SmartStore" |
+| 9 | `SkillTest_Android_MobileSync` | Android (Gradle) | `android-mobile-sdk` → "Add Mobile SDK" → "Add SmartStore" → "Add MobileSync" |
+| 10 | `SkillTest_Android_Biometric` | Android (Gradle) | `android-mobile-sdk` → "Add Mobile SDK" → "Add Biometric Auth" |
 
 ## Prerequisites
 
@@ -267,71 +269,80 @@ KT
 
 Once scaffolded, apply the consumer skills. iOS apps 2–4 need `pod install` after CocoaPods wiring; iOS app 1 does this internally via `create-ios-app-with-mobile-sdk`.
 
-### App 1 — iOS Full (create-ios-app-with-mobile-sdk)
+### App 1 — iOS Full (ios-mobile-sdk → Create New App)
 
-The `create-ios-app-with-mobile-sdk` skill handles scaffolding + SDK wiring in one pass. Invoke it with:
+Invoke `ios-mobile-sdk` skill and follow the "Create New App" scenario with:
 - App name: `SkillTest_iOS_Full`
 - Bundle ID: `com.skilltest.ios.full`
 - Output directory: `$BASE`
 - Dependency manager: CocoaPods
 - Consumer key / callback URL / login host: leave as placeholders
 
-### App 2 — iOS SDK only (add-mobile-sdk-ios)
+This scenario handles scaffolding + SDK wiring in one pass.
+
+### App 2 — iOS SDK only (ios-mobile-sdk → Add Mobile SDK)
 
 1. Run `scaffold_ios SkillTest_iOS_SDK com.skilltest.ios.sdk $BASE`
-2. Apply `add-mobile-sdk-ios` to `$BASE/SkillTest_iOS_SDK` (CocoaPods path, placeholders for OAuth)
+2. Invoke `ios-mobile-sdk` skill and follow the "Add Mobile SDK" scenario for `$BASE/SkillTest_iOS_SDK` (CocoaPods path, placeholders for OAuth)
 3. `pod install` in `$BASE/SkillTest_iOS_SDK`
 
-### App 3 — iOS SmartStore (add-mobile-sdk-ios → add-smartstore-ios)
+### App 3 — iOS SmartStore (ios-mobile-sdk → Add Mobile SDK → Add SmartStore)
 
 1. Run `scaffold_ios SkillTest_iOS_SmartStore com.skilltest.ios.smartstore $BASE`
-2. Apply `add-mobile-sdk-ios`
-3. Apply `add-smartstore-ios` (soup name: `Item`)
+2. Invoke `ios-mobile-sdk` skill → "Add Mobile SDK" scenario
+3. Follow the "Add SmartStore" section within the same skill (soup name: `Item`)
 4. `pod install`
 
-### App 4 — iOS MobileSync (add-mobile-sdk-ios → add-smartstore-ios → add-mobilesync-ios)
+### App 4 — iOS MobileSync (ios-mobile-sdk → Add Mobile SDK → Add SmartStore → Add MobileSync)
 
 1. Run `scaffold_ios SkillTest_iOS_MobileSync com.skilltest.ios.mobilesync $BASE`
-2. Apply `add-mobile-sdk-ios`
-3. Apply `add-smartstore-ios` (soup name: `Item`)
-4. Apply `add-mobilesync-ios` (soup: `Item`, sObject: `Contact`)
+2. Invoke `ios-mobile-sdk` skill → "Add Mobile SDK" scenario
+3. Follow the "Add SmartStore" section (soup name: `Item`)
+4. Follow the "Add MobileSync" section (soup: `Item`, sObject: `Contact`)
 5. `pod install`
 
-### App 5 — iOS Biometric (add-mobile-sdk-ios → add-biometric-auth-ios)
+### App 5 — iOS Biometric (ios-mobile-sdk → Add Mobile SDK → Add Biometric Auth)
 
 1. Run `scaffold_ios SkillTest_iOS_Biometric com.skilltest.ios.biometric $BASE`
-2. Apply `add-mobile-sdk-ios` (CocoaPods path, placeholders for OAuth)
-3. Apply `add-biometric-auth-ios`
+2. Invoke `ios-mobile-sdk` skill → "Add Mobile SDK" scenario (CocoaPods path, placeholders for OAuth)
+3. Follow the "Add Biometric Auth" section
 4. `pod install`
 
-### App 6 — Android Full (create-android-app-with-mobile-sdk)
+### App 6 — Android Full (android-mobile-sdk → Create New App)
 
-The `create-android-app-with-mobile-sdk` skill handles scaffolding + SDK wiring. Invoke it with:
+Invoke `android-mobile-sdk` skill and follow the "Create New App" scenario with:
 - App name: `SkillTest_Android_Full`
 - Package name: `com.skilltest.android.full`
 - Output directory: `$BASE`
 - Consumer key / callback URL / login host: leave as placeholders
 
-### App 7 — Android SDK only (add-mobile-sdk-android)
+This scenario handles scaffolding + SDK wiring in one pass.
+
+### App 7 — Android SDK only (android-mobile-sdk → Add Mobile SDK)
 
 1. Run `scaffold_android SkillTest_Android_SDK com.skilltest.android.sdk $BASE`
-2. App is fully wired by the scaffold (the scaffold already includes the SDK wiring from `add-mobile-sdk-android`)
+2. Invoke `android-mobile-sdk` skill and follow the "Add Mobile SDK" scenario
 
-### App 8 — Android SmartStore (add-mobile-sdk-android → add-smartstore-android)
+The scaffold already includes the SDK wiring, so this primarily validates the skill's instructions match the expected setup.
+
+### App 8 — Android SmartStore (android-mobile-sdk → Add Mobile SDK → Add SmartStore)
 
 1. Run `scaffold_android SkillTest_Android_SmartStore com.skilltest.android.smartstore $BASE`
-2. Apply `add-smartstore-android` (soup name: `Item`)
+2. Invoke `android-mobile-sdk` skill → "Add Mobile SDK" scenario
+3. Follow the "Add SmartStore" section within the same skill (soup name: `Item`)
 
-### App 9 — Android MobileSync (add-mobile-sdk-android → add-smartstore-android → add-mobilesync-android)
+### App 9 — Android MobileSync (android-mobile-sdk → Add Mobile SDK → Add SmartStore → Add MobileSync)
 
 1. Run `scaffold_android SkillTest_Android_MobileSync com.skilltest.android.mobilesync $BASE`
-2. Apply `add-smartstore-android` (soup name: `Item`)
-3. Apply `add-mobilesync-android` (soup: `Item`, sObject: `Contact`)
+2. Invoke `android-mobile-sdk` skill → "Add Mobile SDK" scenario
+3. Follow the "Add SmartStore" section (soup name: `Item`)
+4. Follow the "Add MobileSync" section (soup: `Item`, sObject: `Contact`)
 
-### App 10 — Android Biometric (add-mobile-sdk-android → add-biometric-auth-android)
+### App 10 — Android Biometric (android-mobile-sdk → Add Mobile SDK → Add Biometric Auth)
 
 1. Run `scaffold_android SkillTest_Android_Biometric com.skilltest.android.biometric $BASE`
-2. Apply `add-biometric-auth-android`
+2. Invoke `android-mobile-sdk` skill → "Add Mobile SDK" scenario
+3. Follow the "Add Biometric Auth" section
 
 ## Step 4: Build All Apps
 
