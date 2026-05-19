@@ -2,6 +2,8 @@
 
 The basic JavaScript React Native template for Salesforce Mobile SDK applications.
 
+> **API style note:** The `react-native-force` SDK uses callback-based APIs (`fn(args, successCallback, errorCallback)`). Promise-style code in this guide is illustrative; use `forceUtil.promiser(fn)` for actual promise wrappers.
+
 ## Overview
 
 `ReactNativeTemplate` is the default starting point for creating React Native apps with the Salesforce Mobile SDK. It provides:
@@ -108,65 +110,69 @@ MyApp/
 
 The main application code. This is where you'll spend most of your time customizing.
 
-**Default implementation:**
+**Default implementation** (matches actual `app.js`):
+
+`app.js` exports `App` as a **named export**, not default:
+```javascript
+export const App = function() { /* ... */ };
+```
+
+`index.js` imports it as a named import:
+```javascript
+import {AppRegistry} from 'react-native';
+import {App} from './app.js';
+import {name as appName} from './app.json';
+
+AppRegistry.registerComponent(appName, () => App);
+```
+
+The `App` component:
+- On mount, calls `oauth.getAuthCredentials(...)` (callback-based) to check auth
+- On auth failure, falls through to `oauth.authenticate(...)` to start OAuth login
+- After auth, calls `net.query('SELECT Id, Name FROM Contact ORDER BY Name LIMIT 100', ...)` to fetch contacts
+- Renders a `FlatList` of contacts
 
 ```javascript
 import React from 'react';
-import {
-    StyleSheet,
-    Text,
-    View,
-    FlatList,
-    ActivityIndicator,
-    TouchableOpacity,
-} from 'react-native';
-
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import { StyleSheet, Text, View, FlatList, ActivityIndicator } from 'react-native';
 import { oauth, net } from 'react-native-force';
 
-const Stack = createStackNavigator();
-
-export default class App extends React.Component {
-  state = {
-    authenticated: false,
-    records: []
-  };
+class ContactListScreen extends React.Component {
+  state = { data: [], loading: true, error: null };
 
   componentDidMount() {
-    // Authenticate and fetch data
-    oauth.getAuthCredentials()
-      .then(credentials => {
-        this.setState({ authenticated: true });
-        return net.query('SELECT Id, Name FROM Account LIMIT 10');
-      })
-      .then(response => {
-        this.setState({ records: response.records });
-      })
-      .catch(error => {
-        console.error('Error:', error);
-      });
+    setTimeout(() => {
+      oauth.getAuthCredentials(
+        (credentials) => this.fetchData(),
+        (error) => oauth.authenticate(
+          () => this.fetchData(),
+          (authError) => this.setState({ loading: false, error: 'Auth failed' })
+        )
+      );
+    }, 1000);
   }
 
-  render() {
-    return (
-      <NavigationContainer>
-        <Stack.Navigator>
-          <Stack.Screen name="Home" component={HomeScreen} />
-          <Stack.Screen name="Details" component={DetailsScreen} />
-        </Stack.Navigator>
-      </NavigationContainer>
+  fetchData() {
+    const soql = 'SELECT Id, Name FROM Contact ORDER BY Name LIMIT 100';
+    net.query(
+      soql,
+      (response) => this.setState({ data: response.records || [], loading: false }),
+      (error) => this.setState({ loading: false, error: 'Query failed' })
     );
   }
+
+  render() { /* ... FlatList, etc. ... */ }
 }
+
+export const App = () => <ContactListScreen />;
 ```
 
 **Key points:**
 
-- `oauth.getAuthCredentials()` - Verify authentication
-- `net.query()` - Execute SOQL queries
-- React Navigation for multi-screen navigation
-- Component-based architecture
+- `App` is a **named export** (`export const App`), not default
+- Sample query is on `Contact`, not `Account`
+- All SDK calls are **callback-based**: `(args, success, error)`
+- For Promise-based usage, wrap with `forceUtil.promiser`
 
 ### iOS Configuration
 

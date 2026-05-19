@@ -2,6 +2,8 @@
 
 The TypeScript React Native template for Salesforce Mobile SDK applications.
 
+> **API style note:** The `react-native-force` SDK uses callback-based APIs (`fn(args, successCallback, errorCallback)`). Promise-style code in this guide is illustrative; use `forceUtil.promiser(fn)` for actual promise wrappers.
+
 ## Overview
 
 `ReactNativeTypeScriptTemplate` is the TypeScript version of the basic React Native template. It provides:
@@ -439,111 +441,42 @@ class ContactCard extends React.Component<ContactCardProps, ContactCardState> {
 
 ## Type Definitions for react-native-force
 
-The `react-native-force` module includes TypeScript definitions. Here's the type structure:
+The `react-native-force` package ships its own TypeScript definitions (`dist/index.d.ts` generated from `src/`). Important types to know:
+
+- **`UserAccount`** (from `react-native-force/dist/typings/oauth`):
+  ```typescript
+  type UserAccount = {
+    accessToken: string;
+    clientId: string;
+    instanceUrl: string;
+    loginUrl: string;
+    orgId: string;
+    refreshToken: string;
+    userAgent: string;
+    userId: string;
+  };
+  ```
+- **`SyncDownTarget`, `SyncUpTarget`, `SyncOptions`, `SyncStatus`, `SyncEvent`** from `react-native-force/dist/typings/mobilesync`
+- **`HttpMethod`, `LogLevel`, `QuerySpecType`, `StoreOrder`** from `react-native-force/dist/typings`
+- **`ExecSuccessCallback<T>`, `ExecErrorCallback`** for callback typing
+
+**The SDK uses callback-based APIs**, not Promises:
 
 ```typescript
-declare module 'react-native-force' {
-  export namespace oauth {
-    interface Credentials {
-      accessToken: string;
-      refreshToken?: string;
-      instanceUrl: string;
-      userId: string;
-      orgId: string;
-      loginUrl: string;
-      identityUrl: string;
-      clientId: string;
-      userAgent: string;
-      communityId?: string;
-      communityUrl?: string;
-    }
+import { oauth, net, forceUtil } from 'react-native-force';
+import type { UserAccount } from 'react-native-force/dist/typings/oauth';
 
-    function getAuthCredentials(): Promise<Credentials>;
-    function authenticate(): Promise<Credentials>;
-    function logout(): void;
-  }
+oauth.getAuthCredentials(
+  (creds: UserAccount) => { /* ... */ },
+  (err: Error) => { /* ... */ }
+);
 
-  export namespace net {
-    interface QueryResponse<T = any> {
-      records: T[];
-      totalSize: number;
-      done: boolean;
-      nextRecordsUrl?: string;
-    }
-
-    function query<T = QueryResponse>(soql: string): Promise<T>;
-    function create(sobject: string, fields: object): Promise<any>;
-    function update(sobject: string, id: string, fields: object): Promise<void>;
-    function del(sobject: string, id: string): Promise<void>;
-    function retrieve(sobject: string, id: string, fieldlist: string[]): Promise<any>;
-  }
-
-  export namespace smartstore {
-    interface IndexSpec {
-      path: string;
-      type: 'string' | 'integer' | 'floating' | 'full_text' | 'json1';
-    }
-
-    interface QuerySpec {
-      queryType: 'exact' | 'range' | 'like' | 'match' | 'smart';
-      indexPath?: string;
-      path?: string;
-      matchKey?: string;
-      beginKey?: any;
-      endKey?: any;
-      likeKey?: string;
-      smartSql?: string;
-      order?: 'ascending' | 'descending';
-      pageSize?: number;
-    }
-
-    function registerSoup(
-      isGlobalStore: boolean,
-      soupName: string,
-      indexes: IndexSpec[]
-    ): Promise<void>;
-
-    function upsertSoupEntries(
-      isGlobalStore: boolean,
-      soupName: string,
-      entries: any[]
-    ): Promise<any[]>;
-
-    function querySoup(
-      isGlobalStore: boolean,
-      soupName: string,
-      querySpec: QuerySpec
-    ): Promise<any>;
-  }
-
-  export namespace mobilesync {
-    enum MERGE_MODE {
-      OVERWRITE,
-      LEAVE_IF_CHANGED
-    }
-
-    function syncDown(
-      isGlobalStore: boolean,
-      target: any,
-      soupName: string,
-      options: any,
-      syncName: string
-    ): Promise<any>;
-
-    function syncUp(
-      isGlobalStore: boolean,
-      options: any,
-      soupName: string,
-      syncOptions: any
-    ): Promise<any>;
-
-    function reSync(
-      isGlobalStore: boolean,
-      syncName: string
-    ): Promise<any>;
-  }
-}
+// Promise-style: wrap with forceUtil.promiser
+const getAuth = forceUtil.promiser(oauth.getAuthCredentials);
+const creds: UserAccount = await getAuth();
 ```
+
+If you prefer additional types not exported by the package, you can add a `types/` folder to your project and write your own `.d.ts` declarations. **Do not redeclare the package's types** — that would mask the bundled definitions.
 
 ## Running the App
 

@@ -2,6 +2,8 @@
 
 The deferred authentication React Native template for Salesforce Mobile SDK applications.
 
+> **API style note:** The `react-native-force` SDK uses callback-based APIs (`fn(args, successCallback, errorCallback)`). Promise-style code in this guide is illustrative; use `forceUtil.promiser(fn)` for actual promise wrappers.
+
 ## Overview
 
 `ReactNativeDeferredTemplate` demonstrates the **deferred authentication pattern**, where login is optional and happens on-demand rather than being required at app launch.

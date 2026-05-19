@@ -2,6 +2,8 @@
 
 The complete sample application demonstrating offline data synchronization with the Salesforce Mobile SDK.
 
+> **API style note:** The `react-native-force` SDK uses callback-based APIs (`fn(args, successCallback, errorCallback)`). Promise-style code in this guide is illustrative; use `forceUtil.promiser(fn)` for actual promise wrappers. This sample also depends on `react-native-elements` and `react-native-vector-icons` (not present in other React Native templates).
+
 ## Overview
 
 `MobileSyncExplorerReactNative` is a **full-featured reference application** that showcases best practices for building offline-first mobile apps with React Native and Salesforce Mobile SDK.

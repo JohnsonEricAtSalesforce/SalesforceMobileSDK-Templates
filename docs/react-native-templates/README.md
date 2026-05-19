@@ -2,6 +2,8 @@
 
 This guide covers all React Native templates in the Salesforce Mobile SDK Templates repository.
 
+> **API style note:** The `react-native-force` SDK uses **callback-based** APIs (`fn(args, successCallback, errorCallback)`). For Promise-based usage, wrap calls with `forceUtil.promiser(fn)`. Code examples in this guide use the actual callback style — examples elsewhere that show Promises should be treated as illustrative.
+
 ## Overview
 
 The Salesforce Mobile SDK provides four React Native templates that serve different use cases:
@@ -240,27 +242,33 @@ Edit the bootconfig files after generation:
 
 ### Accessing Salesforce Data
 
-Use the `react-native-force` module:
+Use the `react-native-force` module. **The SDK uses callback-based APIs** (`success`, `error`):
 
 ```javascript
 import { oauth, net, smartstore, mobilesync } from 'react-native-force';
 
 // Execute SOQL query
-net.query('SELECT Id, Name FROM Account LIMIT 10')
-  .then(response => {
-    console.log('Records:', response.records);
-  });
+net.query(
+  'SELECT Id, Name FROM Contact LIMIT 10',
+  (response) => { console.log('Records:', response.records); },
+  (error) => { console.error(error); }
+);
 
 // Check authentication status
-oauth.getAuthCredentials()
-  .then(credentials => {
-    console.log('Access token:', credentials.accessToken);
-  });
+oauth.getAuthCredentials(
+  (credentials) => { console.log('Access token:', credentials.accessToken); },
+  (error) => { console.error(error); }
+);
+```
+
+If you want to use Promises, wrap callback APIs with `forceUtil.promiser`:
+```javascript
+import { forceUtil } from 'react-native-force';
+const query = forceUtil.promiser(net.query);
+const records = (await query('SELECT Id FROM Contact')).records;
 ```
 
 ### Using SmartStore (Offline Storage)
-
-SmartStore is available in all templates:
 
 ```javascript
 import { smartstore } from 'react-native-force';
@@ -268,18 +276,22 @@ import { smartstore } from 'react-native-force';
 // Register a soup (table)
 smartstore.registerSoup(
   false, // isGlobalStore
-  'contacts', // soupName
-  [ // indexes
+  'contacts',
+  [
     { path: 'Id', type: 'string' },
     { path: 'Name', type: 'string' }
-  ]
+  ],
+  (soupName) => { /* success */ },
+  (error) => { /* error */ }
 );
 
 // Query data
 smartstore.querySoup(
   false,
   'contacts',
-  { queryType: 'exact', path: 'Id', matchKey: '001xx000003DGb0' }
+  { queryType: 'exact', indexPath: 'Id', matchKey: '001xx000003DGb0' },
+  (cursor) => { /* success */ },
+  (error) => { /* error */ }
 );
 ```
 
@@ -296,15 +308,20 @@ mobilesync.syncDown(
   { type: 'soql', query: 'SELECT Id, Name FROM Contact LIMIT 100' }, // target
   'contacts', // soupName
   { mergeMode: mobilesync.MERGE_MODE.OVERWRITE }, // options
-  'contactSync' // syncName
+  'contactSync', // syncName
+  (syncResult) => { /* success */ },
+  (error) => { /* error */ }
 );
 
 // Sync up to Salesforce
 mobilesync.syncUp(
   false, // isGlobalStore
-  {}, // options
-  'contacts', // soupName
-  { mergeMode: mobilesync.MERGE_MODE.OVERWRITE, fieldlist: ['Name', 'Email'] } // options
+  {}, // target (use empty {} for default)
+  'contacts',
+  { mergeMode: mobilesync.MERGE_MODE.OVERWRITE, fieldlist: ['Name', 'Email'] },
+  null, // syncName
+  (syncResult) => { /* success */ },
+  (error) => { /* error */ }
 );
 ```
 
