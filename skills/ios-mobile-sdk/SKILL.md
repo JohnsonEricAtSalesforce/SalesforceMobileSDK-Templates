@@ -166,10 +166,20 @@ options:
     iOS: "18.0"
 settings:
   PRODUCT_BUNDLE_IDENTIFIER: <BundleID>
+schemes:
+  <AppName>:
+    build:
+      targets:
+        <AppName>: all
 targets:
   <AppName>:
     type: application
     platform: iOS
+    supportedDestinations: [iOS, iPadOS, iOSSimulator]
+    settings:
+      CODE_SIGN_ENTITLEMENTS: <AppName>/<AppName>.entitlements
+      CODE_SIGN_STYLE: Automatic
+      CODE_SIGN_IDENTITY: "-"
     sources:
       - <AppName>
     info:
@@ -186,6 +196,14 @@ targets:
 
 Replace `<AppName>`, `<BundleIDPrefix>`, and `<BundleID>` with actual values.
 
+> **Why `supportedDestinations`**: On Xcode 16+ the new project model excludes the iOS Simulator from a target's eligible destinations unless this is set explicitly. Without it, `xcodebuild -showdestinations` returns empty and headless / agent builds fail with `Found no destinations for the scheme`.
+
+> **Why a `schemes:` block**: xcodegen otherwise generates a user-only scheme (not in `xcshareddata/xcschemes/`), so `xcodebuild` from the command line can't see it.
+
+> **Why `CODE_SIGN_IDENTITY: "-"` + entitlements file**: Mobile SDK persists OAuth tokens to the keychain, which requires a `keychain-access-groups` entitlement. Entitlements only attach when the app is code-signed — ad-hoc signing (`"-"`) is sufficient on the simulator. **Do not build with `CODE_SIGNING_ALLOWED=NO`** — entitlements get stripped, and login will silently fail with `errSecMissingEntitlement (-34018)` and "access token missing" in the logs.
+
+You'll create the referenced `<AppName>.entitlements` file in the next section ("Add Mobile SDK"). For now, the `project.yml` is ready.
+
 ### Step 3: Generate the Xcode Project
 
 ```bash
@@ -194,7 +212,9 @@ xcodegen generate
 
 This creates `<AppName>.xcodeproj`.
 
-> **Important**: When using xcodegen with CocoaPods, you must run `pod install` AFTER running `xcodegen generate` whenever you add new source files. This is because xcodegen regenerates the `.xcodeproj` file, which can break the CocoaPods integration. The workflow is: `xcodegen generate` → add new `.swift` files → `xcodegen generate` → `pod install`.
+> **Important — re-run `xcodegen generate` after adding new files**: xcodegen only picks up files that exist on disk at generation time. Whenever you add a new `.swift`, `.plist`, `.entitlements`, `.storyboard`, or `.json` file to the source folder, re-run `xcodegen generate` so the Xcode project includes it. This applies to both SPM and CocoaPods projects.
+>
+> **CocoaPods only**: `xcodegen generate` regenerates the `.xcodeproj` file, which breaks the CocoaPods workspace integration. Run `pod install` after every regeneration. The workflow is: `xcodegen generate` → add new files → `xcodegen generate` → `pod install`.
 
 ### Step 4: Add Mobile SDK
 
@@ -429,9 +449,36 @@ Add the following keys to the app target's `Info.plist`:
 
 Use the login host provided by the user, or `login.salesforce.com` as the default.
 
-### Step 8: Build and Verify
+### Step 8: Add the Keychain Entitlements File
+
+**This step is required.** Mobile SDK persists OAuth access and refresh tokens in the iOS keychain, which requires the app to declare a `keychain-access-groups` entitlement. Without it, login appears to succeed in the UI but the SDK cannot store tokens — auth then fails silently with `errSecMissingEntitlement (-34018)` and `Authentication failed: ... access token` in the device logs, and your post-login UI never appears.
+
+Create `<AppName>.entitlements` inside the app target's source folder (next to `Info.plist`):
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>keychain-access-groups</key>
+    <array>
+        <string>$(AppIdentifierPrefix)<BundleID></string>
+    </array>
+</dict>
+</plist>
+```
+
+Replace `<BundleID>` with the same value used in `project.yml` (e.g. `com.mycompany.myapp`).
+
+If you used the `project.yml` template from "Create New App", `CODE_SIGN_ENTITLEMENTS` already points at this file. If you're integrating into an existing project, set **Code Signing Entitlements** in Build Settings to `<AppName>/<AppName>.entitlements`, or under **Signing & Capabilities** add the **Keychain Sharing** capability and add a group matching your bundle ID.
+
+After adding the file, run `xcodegen generate` so the project picks it up.
+
+### Step 9: Build and Verify
 
 Build and run. On first launch, the Salesforce login screen should appear. After successful login, you should see **"Mobile SDK ready"**.
+
+> **Do not pass `CODE_SIGNING_ALLOWED=NO`** to `xcodebuild`. It strips the entitlements file from the built `.app`, the keychain calls fail with `-34018`, and login fails silently with no user-visible error. For headless / CI builds on the simulator, ad-hoc signing (`CODE_SIGN_IDENTITY=-`, the default in the template) is the right choice.
 
 ---
 
@@ -819,6 +866,12 @@ Check that `SFDCOAuthLoginHost` is in `Info.plist` and `bootconfig.plist` is inc
 
 **Login screen has black bars above and below it**
 `LaunchScreen.storyboard` is missing or not set in `Info.plist` as `UILaunchStoryboardName`.
+
+**Login screen accepts credentials but the app never advances to its post-login UI**
+The keychain entitlement is missing or has been stripped by the build. In Console / `xcrun simctl spawn <udid> log show ...` you will see `errSecMissingEntitlement` / OSStatus `-34018` and `Authentication failed: ... access token`. Verify (a) `<AppName>.entitlements` exists with a `keychain-access-groups` entry matching the bundle ID, (b) Build Settings → **Code Signing Entitlements** points at it, and (c) the build is **not** using `CODE_SIGNING_ALLOWED=NO` (which strips entitlements). Ad-hoc signing (`CODE_SIGN_IDENTITY=-`) is sufficient on the simulator.
+
+**`xcodebuild` fails with "Found no destinations for the scheme"**
+The target is missing `supportedDestinations` (Xcode 16+ excludes the simulator by default), or the scheme is not shared. In `project.yml`, add `supportedDestinations: [iOS, iPadOS, iOSSimulator]` to the target and a top-level `schemes:` block, then re-run `xcodegen generate`.
 
 ### SmartStore Issues
 
