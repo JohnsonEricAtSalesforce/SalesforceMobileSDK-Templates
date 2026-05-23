@@ -21,7 +21,6 @@ if (fs.existsSync(targetDir)) {
     execSync('git clone --branch ' + branch + ' --single-branch --depth 1 ' + repoUrl + ' ' + targetDir, {stdio:[0,1,2]});
     rimraf.sync(path.join('mobile_sdk', 'SalesforceMobileSDK-Android', 'hybrid'));
     rimraf.sync(path.join('mobile_sdk', 'SalesforceMobileSDK-Android', 'libs', 'test'));
-    rimraf.sync(path.join('mobile_sdk', 'SalesforceMobileSDK-Android', 'libs', 'SalesforceReact', 'package.json')); // confuses metro bundler
 
     // Patch settings.gradle.kts to exclude sample apps
     var settingsFile = path.join('mobile_sdk', 'SalesforceMobileSDK-Android', 'settings.gradle.kts');

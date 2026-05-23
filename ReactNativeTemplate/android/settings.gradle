@@ -15,7 +15,8 @@ if (salesforceMobileSdkRoot.exists()) {
         dependencySubstitution {
             substitute(module('com.salesforce.mobilesdk:SalesforceSDK')).using(project(':libs:SalesforceSDK'))
             substitute(module('com.salesforce.mobilesdk:SalesforceAnalytics')).using(project(':libs:SalesforceAnalytics'))
-            substitute(module('com.salesforce.mobilesdk:SalesforceReact')).using(project(':libs:SalesforceReact'))
+            substitute(module('com.salesforce.mobilesdk:SmartStore')).using(project(':libs:SmartStore'))
+            substitute(module('com.salesforce.mobilesdk:MobileSync')).using(project(':libs:MobileSync'))
         }
     }
 }
