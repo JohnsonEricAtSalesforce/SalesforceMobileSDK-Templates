@@ -692,7 +692,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 ### Step 3: Set Up Sync After Login in SceneDelegate.swift
 
-Add a `MobileSync` import and call `setupUserSyncFromDefaultConfig()`, then perform an initial sync:
+Add a `MobileSync` import and call `setupUserSyncsFromDefaultConfig()`, then trigger an initial sync.
+
+> **What `setupUserSyncsFromDefaultConfig()` actually does**: it reads `usersync.json` and **registers** the named sync configurations with the sync manager. It does **not** run them. To execute a registered sync, call `syncManager.reSync(named:onUpdate:)` after registration. The "Perform initial sync" example below shows the explicit, programmatic alternative — useful when you want a one-off sync that isn't declared in `usersync.json`.
 
 **Before:**
 ```swift
@@ -710,23 +712,31 @@ func setupRootViewController() {
 **After:**
 ```swift
 import MobileSync
-import SalesforceSDKCore
+import SalesforceSDKCore   // UserAccountManager lives in Core
 
 // ...
 
 func setupRootViewController() {
     MobileSyncSDKManager.shared.setupUserStoreFromDefaultConfig()
     MobileSyncSDKManager.shared.setupUserSyncsFromDefaultConfig()
-    
-    // Perform initial sync (optional, for demonstration)
-    if let syncManager = SFSyncManager.sharedInstance(for: SFUserAccountManager.shared().currentUser) {
-        let target = SFSoqlSyncDownTarget(query: "SELECT Id, Name FROM <SObjectType>")
-        let options = SFSyncOptions.newSyncOptions(forSyncDown: .overwrite)
-        let sync = try? syncManager.syncDown(target: target, soupName: "<SoupName>", options: options) { _ in
-            print("Initial sync complete")
+
+    // Trigger a sync registered in usersync.json by name.
+    if let user = UserAccountManager.shared.currentUserAccount {
+        let syncManager = SyncManager.sharedInstance(forUserAccount: user)
+        try? syncManager.reSync(named: "<SyncName>") { sync in
+            print("Sync \(sync.syncName ?? "") status: \(sync.status)")
+        }
+
+        // Or run a one-off sync that isn't in usersync.json.
+        let target = SoqlSyncDownTarget.newSyncTarget("SELECT Id, Name FROM <SObjectType>")
+        let options = SyncOptions.newSyncOptions(forSyncDown: .overwrite)
+        syncManager.syncDown(target: target,
+                             options: options,
+                             soupName: "<SoupName>") { sync in
+            print("Initial sync status: \(sync.status)")
         }
     }
-    
+
     let vc = UIViewController()
     vc.view.backgroundColor = .systemBackground
     let label = UILabel()
@@ -741,7 +751,9 @@ func setupRootViewController() {
 }
 ```
 
-Replace `<SObjectType>` and `<SoupName>` with actual values (e.g. `Contact` and `Item`).
+Replace `<SObjectType>`, `<SoupName>`, and `<SyncName>` with actual values (e.g. `Contact`, `Item`, and a sync name from `usersync.json`).
+
+> **Swift name vs. Objective-C class**: the Mobile SDK is written in Objective-C and exposes Swift-native names via `NS_SWIFT_NAME` annotations. From Swift you write `SyncManager`, `SoqlSyncDownTarget`, `SyncOptions`, and `UserAccountManager`; the underlying ObjC classes are `SFMobileSyncSyncManager`, `SFSoqlSyncDownTarget`, `SFSyncOptions`, and `SFUserAccountManager`. They aren't deprecated — they're the same types under different names per language. See [API Reference](#api-reference) below.
 
 ### Step 4: Create usersync.json
 
@@ -882,6 +894,32 @@ The target is missing `supportedDestinations` (Xcode 16+ excludes the simulator 
 
 **Biometric prompt does not appear**
 Verify `NSFaceIDUsageDescription` is in `Info.plist` and `BiometricAuthenticationManager.shared.biometricAuthenticationEnabled` is set to `true`.
+
+---
+
+<a name="api-reference"></a>
+## API Reference
+
+The Salesforce Mobile SDK for iOS is written in Objective-C with Swift-native names exposed via `NS_SWIFT_NAME(...)` annotations on the ObjC class declarations. **There are not two APIs — there is one type with two names**, one per language. When the compiler tells you `cannot find 'SFXxx' in scope` from Swift, the fix is to use the Swift-visible name, not to look for a "newer" replacement.
+
+| Use from Swift | Underlying ObjC class | Module |
+|---|---|---|
+| `UserAccountManager` | `SFUserAccountManager` | `SalesforceSDKCore` |
+| `SyncManager` | `SFMobileSyncSyncManager` | `MobileSync` |
+| `SyncOptions` | `SFSyncOptions` | `MobileSync` |
+| `SoqlSyncDownTarget` | `SFSoqlSyncDownTarget` | `MobileSync` |
+| `SyncState` | `SFSyncState` | `MobileSync` |
+
+When in doubt, the source of truth is the SDK headers. Search the upstream repo for the canonical Swift name:
+
+- SDK source: <https://github.com/forcedotcom/SalesforceMobileSDK-iOS>
+- Examples: search for `NS_SWIFT_NAME(SyncManager)`, `NS_SWIFT_NAME(SoqlSyncDownTarget)`, etc., to confirm the Swift name and method labels.
+
+Common gotchas the headers will resolve for you:
+
+- `UserAccountManager.shared` is a **property**, not a method — write `UserAccountManager.shared.currentUserAccount`, not `UserAccountManager.shared().currentUser`.
+- `SyncManager.sharedInstance` takes the label `forUserAccount:` from Swift (`NS_SWIFT_NAME(sharedInstance(forUserAccount:))`), not `for:`.
+- `SoqlSyncDownTarget` has no Swift initializer; construct it via `SoqlSyncDownTarget.newSyncTarget(_:)`.
 
 ---
 
