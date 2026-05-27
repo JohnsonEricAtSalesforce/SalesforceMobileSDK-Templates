@@ -43,6 +43,7 @@ import {
     FlatList,
     ActivityIndicator,
     TouchableOpacity,
+    StatusBar,
 } from 'react-native';
 
 import { NavigationContainer } from '@react-navigation/native';
@@ -474,6 +475,7 @@ const Stack = createNativeStackNavigator();
 export const App = function() {
     return (
         <NavigationContainer>
+            <StatusBar backgroundColor={colors.sfBlue} barStyle="light-content" />
             <Stack.Navigator
                 screenOptions={{
                     headerStyle: {
@@ -483,6 +485,9 @@ export const App = function() {
                     headerTitleStyle: {
                         fontWeight: '600',
                     },
+                    statusBarTranslucent: true,
+                    statusBarColor: colors.sfBlue,
+                    statusBarStyle: 'light',
                 }}
             >
                 <Stack.Screen
