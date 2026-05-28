@@ -78,6 +78,7 @@ You can override the SDK dependencies to test against custom branches or forks. 
 - **React Native Templates**: `react_native`
   - iOS: Runs `installios.js` → `xcodebuild` in `ios/` directory
   - Android: Runs `installandroid.js` → `gradle assembleDebug` in `android/` directory
+  - **Note (SDK 14.0+)**: `--rn-force-branch` controls both the JS API and the Android bridge code (both live in the ReactNative repo). `--msdk-android-branch` only affects core SDK libraries (MobileSync, SmartStore, SalesforceSDK).
 
 - **Hybrid Templates**: Not supported
 

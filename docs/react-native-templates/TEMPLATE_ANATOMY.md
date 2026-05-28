@@ -348,18 +348,22 @@ if (fs.existsSync(targetDir)) {
 **Key differences from iOS:**
 
 - No CocoaPods equivalent to run (Gradle handles dependencies)
-- Cleans up `hybrid/`, `libs/test/`, and `SalesforceReact/package.json` (confuses Metro bundler)
+- Cleans up `hybrid/` and `libs/test/` directories
 - Gradle uses **composite build** to reference the cloned SDK (see `android/settings.gradle`)
 
 **Composite build in settings.gradle:**
+
+> **SDK 14.0 Update:** `SalesforceReact` is no longer in the Android SDK. It's now provided by the `react-native-force` npm package via autolinking. Only core SDK libraries (SalesforceSDK, SmartStore, MobileSync) are substituted.
 
 ```gradle
 includeBuild('../mobile_sdk/SalesforceMobileSDK-Android') {
     dependencySubstitution {
         substitute(module('com.salesforce.mobilesdk:SalesforceSDK')).
             using project(':libs:SalesforceSDK')
-        substitute(module('com.salesforce.mobilesdk:SalesforceReact')).
-            using project(':libs:SalesforceReact')
+        substitute(module('com.salesforce.mobilesdk:SmartStore')).
+            using project(':libs:SmartStore')
+        substitute(module('com.salesforce.mobilesdk:MobileSync')).
+            using project(':libs:MobileSync')
     }
 }
 ```
