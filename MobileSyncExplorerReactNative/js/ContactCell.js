@@ -42,8 +42,8 @@ class ContactCell extends React.Component {
         const title = this.props.contact.Title;
         
         return (<ListItem onPress={this.props.onSelect} bottomDivider>
-                  <ContactBadge contact={this.props.contact}/>
-                  <ListItem.Content>
+                  <ContactBadge key="badge" contact={this.props.contact}/>
+                  <ListItem.Content key="content">
                     <ListItem.Title>{fullName}</ListItem.Title>
                     <ListItem.Subtitle>{title}</ListItem.Subtitle>
                   </ListItem.Content>
