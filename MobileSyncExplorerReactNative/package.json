@@ -10,12 +10,12 @@
     "test": "jest"
   },
   "sdkDependencies": {
-    "SalesforceMobileSDK-Android": "https://github.com/wmathurin/SalesforceMobileSDK-Android.git#rn-android-in-react-native",
+    "SalesforceMobileSDK-Android": "https://github.com/forcedotcom/SalesforceMobileSDK-Android.git#dev",
     "SalesforceMobileSDK-iOS": "https://github.com/forcedotcom/SalesforceMobileSDK-iOS.git#dev"
   },
   "dependencies": {
     "@react-navigation/native": "7.2.5",
-    "@react-navigation/stack": "7.9.3",
+    "@react-navigation/native-stack": "7.16.0",
     "react": "19.1.1",
     "react-native": "0.82.1",
     "@react-native/new-app-screen": "0.82.1",
