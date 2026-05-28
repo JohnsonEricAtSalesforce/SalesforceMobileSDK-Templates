@@ -60,10 +60,10 @@ Defines SDK dependencies and npm packages.
   
   "dependencies": {
     "react": "19.1.0",
-    "react-native": "0.81.5",
+    "react-native": "0.82.1",
     "react-native-force": "git+https://github.com/forcedotcom/SalesforceMobileSDK-ReactNative.git#dev",
     "@react-navigation/native": "7.1.10",
-    "@react-navigation/stack": "7.3.3",
+    "@react-navigation/native-stack": "7.16.0",
     "react-native-safe-area-context": "5.5.2",
     "react-native-gesture-handler": "2.29.1",
     "react-native-screens": "4.20.0"
@@ -747,10 +747,10 @@ Main application code.
 import React from 'react';
 import { StyleSheet, Text, View, FlatList } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { oauth, net } from 'react-native-force';
 
-const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
 
 // Main App component
 export default class App extends React.Component {
