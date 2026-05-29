@@ -46,7 +46,7 @@ import {
 } from 'react-native';
 
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import {oauth, net} from 'react-native-force';
 
 // ===========================
@@ -463,7 +463,7 @@ const styles = StyleSheet.create({
 // ===========================
 // Navigation Setup
 // ===========================
-const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
 
 /**
  * App root component with navigation container.
@@ -483,6 +483,9 @@ export const App = function() {
                     headerTitleStyle: {
                         fontWeight: '600',
                     },
+                    statusBarTranslucent: true,
+                    statusBarColor: colors.sfBlue,
+                    statusBarStyle: 'light',
                 }}
             >
                 <Stack.Screen

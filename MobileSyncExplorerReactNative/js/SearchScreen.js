@@ -165,7 +165,10 @@ class SearchScreen extends React.Component {
             'Are you sure you want to logout',
             [
                 {text: 'Cancel' },
-                {text: 'OK', onPress: () => oauth.logout()},
+                {text: 'OK', onPress: () => oauth.logout(() => oauth.authenticate(
+                    () => { this.setState({contacts: []}); this.trySyncData(); },
+                    () => {}
+                ))},
             ],
             { cancelable: true }
         )

@@ -237,7 +237,7 @@ Edit the bootconfig files after generation:
 ### Adding New Screens
 
 1. Create a new React component in your app
-2. Use `@react-navigation/stack` or `@react-navigation/native` for navigation
+2. Use `@react-navigation/native-stack` or `@react-navigation/native` for navigation
 3. All templates include React Navigation by default
 
 ### Accessing Salesforce Data
